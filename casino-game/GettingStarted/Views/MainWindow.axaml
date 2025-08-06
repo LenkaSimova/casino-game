@@ -74,30 +74,29 @@
                             Width="100"
                             Height="120"
                             Classes="reel-symbol">
-                        <TextBlock HorizontalAlignment="Center"
-                                   VerticalAlignment="Center"
-                                   FontSize="48"
-                                   Text="{Binding Reel1Symbol}" />
+                        <Image Width="80"
+                               Height="80"
+                               Source="{Binding Reel1Symbol}" />
+
                     </Border>
                     <!--  Reel 2  -->
                     <Border Grid.Column="1"
                             Width="100"
                             Height="120"
                             Classes="reel-symbol">
-                        <TextBlock HorizontalAlignment="Center"
-                                   VerticalAlignment="Center"
-                                   FontSize="48"
-                                   Text="{Binding Reel2Symbol}" />
+                        <Image Width="80"
+                               Height="80"
+                               Source="{Binding Reel2Symbol}" />
+
                     </Border>
                     <!--  Reel 3  -->
                     <Border Grid.Column="2"
                             Width="100"
                             Height="120"
                             Classes="reel-symbol">
-                        <TextBlock HorizontalAlignment="Center"
-                                   VerticalAlignment="Center"
-                                   FontSize="48"
-                                   Text="{Binding Reel3Symbol}" />
+                        <Image Width="80"
+                               Height="80"
+                               Source="{Binding Reel3Symbol}" />
                     </Border>
                 </Grid>
             </Grid>
