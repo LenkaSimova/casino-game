@@ -1,0 +1,135 @@
+<Window x:Class="GettingStarted.Views.MainWindow"
+        xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:GettingStarted.ViewModels"
+        Title="Casino Slot Machine"
+        d:DesignHeight="450"
+        d:DesignWidth="400"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        mc:Ignorable="d">
+
+    <Design.DataContext>
+        <!--
+            This only sets the DataContext for the previewer in an IDE,
+            to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs)
+        -->
+        <vm:MainWindowViewModel />
+    </Design.DataContext>
+
+    <Window.Styles>
+        <!--  Slot machine button style  -->
+        <Style Selector="Button.slot-button">
+            <Setter Property="Background" Value="#FF4A90E2" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="Padding" Value="20,10" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+        <!--  Reel symbol style  -->
+        <Style Selector="Border.reel-symbol">
+            <Setter Property="Background" Value="White" />
+            <Setter Property="BorderBrush" Value="#FFD0D0D0" />
+            <Setter Property="BorderThickness" Value="2" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="Margin" Value="2" />
+        </Style>
+    </Window.Styles>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!--  Slot Machine Display  -->
+        <Border Grid.Row="0"
+                Padding="20"
+                Background="#FF2C3E50">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <!--  Credits Display  -->
+                <TextBlock Grid.Row="0"
+                           Margin="0,0,0,20"
+                           HorizontalAlignment="Center"
+                           FontSize="24"
+                           FontWeight="Bold"
+                           Foreground="Gold"
+                           Text="{Binding Credits, StringFormat='Credits: {0}'}" />
+                <!--  Reels  -->
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <!--  Reel 1  -->
+                    <Border Grid.Column="0"
+                            Width="100"
+                            Height="120"
+                            Classes="reel-symbol">
+                        <TextBlock HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   FontSize="48"
+                                   Text="{Binding Reel1Symbol}" />
+                    </Border>
+                    <!--  Reel 2  -->
+                    <Border Grid.Column="1"
+                            Width="100"
+                            Height="120"
+                            Classes="reel-symbol">
+                        <TextBlock HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   FontSize="48"
+                                   Text="{Binding Reel2Symbol}" />
+                    </Border>
+                    <!--  Reel 3  -->
+                    <Border Grid.Column="2"
+                            Width="100"
+                            Height="120"
+                            Classes="reel-symbol">
+                        <TextBlock HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   FontSize="48"
+                                   Text="{Binding Reel3Symbol}" />
+                    </Border>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <!--  Controls  -->
+        <StackPanel Grid.Row="1"
+                    Margin="20"
+                    HorizontalAlignment="Center"
+                    Orientation="Horizontal">
+            <TextBlock Margin="0,0,10,0"
+                       VerticalAlignment="Center"
+                       Text="Bet:" />
+            <TextBlock Margin="0,0,10,0"
+                       VerticalAlignment="Center"
+                       Text="{Binding BetAmount}" />
+            <NumericUpDown Width="80"
+                           Margin="0,0,20,0"
+                           Maximum="10"
+                           Minimum="1"
+                           Value="{Binding BetAmount}" />
+            <Button Classes="slot-button"
+                    Command="{Binding SpinCommand}"
+                    Content="SPIN"
+                    IsEnabled="{Binding CanSpin}" />
+            <TextBlock Margin="20,0,0,0"
+                       VerticalAlignment="Center"
+                       FontWeight="Bold"
+                       Foreground="Green"
+                       Text="{Binding LastWin, StringFormat='Last Win: {0}'}" />
+        </StackPanel>
+    </Grid>
+
+
+</Window>
