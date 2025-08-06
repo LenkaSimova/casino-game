@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
+using System.Threading.Tasks;
 
 namespace GettingStarted.ViewModels;
 
@@ -83,8 +84,13 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private bool _canSpin = true;
 
+    [ObservableProperty]
+    private bool _isSpinning = false;
+
+    private int _spinSpeed = 50; // milliseconds between symbol changes
+
     [RelayCommand(CanExecute = nameof(CanSpin))]
-    private void Spin()
+    private async Task SpinAsync()
     {
         if (Credits < BetAmount)
         {
@@ -94,12 +100,16 @@ public partial class MainWindowViewModel : ViewModelBase
         // Deduct bet amount
         Credits -= BetAmount;
         LastWin = 0;
+        IsSpinning = true;
 
-        // Spin the reels and store indices
+        // Generate final results
         _reel1Index = _random.Next(_symbolBitmaps.Length);
         _reel2Index = _random.Next(_symbolBitmaps.Length);
         _reel3Index = _random.Next(_symbolBitmaps.Length);
 
+        await AnimateSpinning();
+
+        // Set final symbols
         Reel1Symbol = _symbolBitmaps[_reel1Index];
         Reel2Symbol = _symbolBitmaps[_reel2Index];
         Reel3Symbol = _symbolBitmaps[_reel3Index];
@@ -107,8 +117,33 @@ public partial class MainWindowViewModel : ViewModelBase
         // Check for wins
         CheckForWins();
 
+        IsSpinning = false;
         // Update CanSpin based on remaining credits
         CanSpin = Credits >= BetAmount;
+    }
+
+    private async Task AnimateSpinning()
+    {
+        int spinDuration = 2000; // Total spin time in milliseconds
+        int elapsed = 0;
+        int currentSpinSpeed = _spinSpeed;
+
+        while (elapsed < spinDuration)
+        {
+            // Show random symbols during spinning
+            Reel1Symbol = _symbolBitmaps[_random.Next(_symbolBitmaps.Length)];
+            Reel2Symbol = _symbolBitmaps[_random.Next(_symbolBitmaps.Length)];
+            Reel3Symbol = _symbolBitmaps[_random.Next(_symbolBitmaps.Length)];
+
+            await Task.Delay(currentSpinSpeed);
+            elapsed += currentSpinSpeed;
+
+            // Gradually slow down the spinning
+            if (elapsed > spinDuration * 0.7)
+            {
+                currentSpinSpeed = Math.Min(currentSpinSpeed + 20, 200);
+            }
+        }
     }
 
     private void CheckForWins()
@@ -150,13 +185,19 @@ public partial class MainWindowViewModel : ViewModelBase
 
     partial void OnBetAmountChanged(int value)
     {
-        CanSpin = Credits >= value;
+        CanSpin = Credits >= value && !IsSpinning;
         SpinCommand.NotifyCanExecuteChanged();
     }
 
     partial void OnCreditsChanged(int value)
     {
-        CanSpin = value >= BetAmount;
+        CanSpin = value >= BetAmount && !IsSpinning;
+        SpinCommand.NotifyCanExecuteChanged();
+    }
+
+    partial void OnIsSpinningChanged(bool value)
+    {
+        CanSpin = Credits >= BetAmount && !value;
         SpinCommand.NotifyCanExecuteChanged();
     }
 }
