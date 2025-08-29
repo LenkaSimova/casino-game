@@ -118,10 +118,63 @@
                            Maximum="10"
                            Minimum="1"
                            Value="{Binding BetAmount}" />
-            <Button Classes="slot-button"
+
+            <Button Name="SpinButton"
+                    Padding="20,10"
+                    HorizontalAlignment="Center"
                     Command="{Binding SpinCommand}"
                     Content="SPIN"
-                    IsEnabled="{Binding CanSpin}" />
+                    FontSize="24"
+                    FontWeight="Bold"
+                    IsEnabled="{Binding CanSpin}">
+
+                <Button.Styles>
+                    <!--  Base style  -->
+                    <Style Selector="Button">
+                        <Setter Property="Background" Value="Gold" />
+                        <Setter Property="Foreground" Value="DarkRed" />
+                    </Style>
+
+                    <!--  Hover state - maintain gold background  -->
+                    <Style Selector="Button:pointerover">
+                        <Setter Property="Background" Value="Gold" />
+                        <Setter Property="Foreground" Value="DarkRed" />
+                    </Style>
+
+                    <Style Selector="Button:not(:disabled)">
+                        <Setter Property="Opacity" Value="1.0" />
+
+                        <Style.Animations>
+                            <!--  Pulsing animation  -->
+                            <Animation IterationCount="Infinite"
+                                       PlaybackDirection="Alternate"
+                                       Duration="0:0:0.3">
+                                <KeyFrame Cue="0%">
+                                    <Setter Property="(ScaleTransform.ScaleX)" Value="1.0" />
+                                    <Setter Property="(ScaleTransform.ScaleY)" Value="1.0" />
+                                </KeyFrame>
+                                <KeyFrame Cue="100%">
+                                    <Setter Property="(ScaleTransform.ScaleX)" Value="1.1" />
+                                    <Setter Property="(ScaleTransform.ScaleY)" Value="1.1" />
+                                </KeyFrame>
+                            </Animation>
+                        </Style.Animations>
+                    </Style>
+
+
+                    <!--  Stop animation when spinning or can't spin  -->
+                    <Style Selector="Button:disabled">
+                        <Setter Property="Opacity" Value="0.5" />
+                        <Setter Property="(ScaleTransform.ScaleX)" Value="1.0" />
+                        <Setter Property="(ScaleTransform.ScaleY)" Value="1.0" />
+                    </Style>
+                </Button.Styles>
+
+                <Button.RenderTransform>
+                    <ScaleTransform />
+                </Button.RenderTransform>
+            </Button>
+
             <TextBlock Margin="20,0,0,0"
                        VerticalAlignment="Center"
                        FontWeight="Bold"
