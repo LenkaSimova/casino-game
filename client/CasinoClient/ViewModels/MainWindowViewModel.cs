@@ -44,8 +44,6 @@ public partial class MainWindowViewModel : ViewModelBase
         _symbolBitmaps[6] = LoadBitmap("diamond.jpg");
         _symbolBitmaps[7] = LoadBitmap("bell.png");
 
-        // _slotBitmap = LoadBitmap("slot.png");
-
         // Initialize reel symbols
         _reel1Symbol = _symbolBitmaps[5];
         _reel2Symbol = _symbolBitmaps[5];
