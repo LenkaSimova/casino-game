@@ -32,25 +32,29 @@ public partial class SlotMachineViewModel : ViewModelBase
     };
 
     // Symbol names for tracking wins
-    private readonly string[] _symbolNames = { "apple", "orange", "lemon", "grape", "cherry", "star", "diamond", "bell" };
+    private readonly string[] _symbolNames = { "star", "orange", "lemon", "grape", "cherry", "apple", "diamond", "bell" };
 
     public SlotMachineViewModel()
     {
         // Load all symbol bitmaps
         _symbolBitmaps = new Bitmap[8];
-        _symbolBitmaps[0] = LoadBitmap("apple.jpg");
+        _symbolBitmaps[0] = LoadBitmap("star.png");
         _symbolBitmaps[1] = LoadBitmap("orange.jpg");
         _symbolBitmaps[2] = LoadBitmap("lemon.jpg");
         _symbolBitmaps[3] = LoadBitmap("grape.jpg");
         _symbolBitmaps[4] = LoadBitmap("cherry.jpg");
-        _symbolBitmaps[5] = LoadBitmap("star.png");
+        _symbolBitmaps[5] = LoadBitmap("apple.jpg");
         _symbolBitmaps[6] = LoadBitmap("diamond.jpg");
         _symbolBitmaps[7] = LoadBitmap("bell.png");
 
+        // Set initial reel indices to 0
+        _reel1Index = 0;
+        _reel2Index = 0;
+        _reel3Index = 0;
         // Initialize reel symbols
-        _reel1Symbol = _symbolBitmaps[5];
-        _reel2Symbol = _symbolBitmaps[5];
-        _reel3Symbol = _symbolBitmaps[5];
+        _reel1Symbol = _symbolBitmaps[_reel1Index];
+        _reel2Symbol = _symbolBitmaps[_reel2Index];
+        _reel3Symbol = _symbolBitmaps[_reel3Index];
     }
 
     private Bitmap LoadBitmap(string fileName)
