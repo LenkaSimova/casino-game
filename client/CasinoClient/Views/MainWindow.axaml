@@ -40,10 +40,9 @@
         </Style>
     </Window.Styles>
 
-    <Grid>
-        <ContentControl Grid.Row="0" Content="{Binding CurrentViewModel}" />
-        <Button Grid.Row="1" Command="{Binding ShowTerminalCommand}" Content="Open Terminal" />
-    </Grid>
+
+    <ContentControl Content="{Binding CurrentViewModel}" />
+
 
 
 </Window>

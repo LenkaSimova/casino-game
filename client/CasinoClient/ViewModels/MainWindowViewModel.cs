@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace CasinoClient.ViewModels;
 
@@ -16,7 +17,9 @@ public partial class MainWindowViewModel : ViewModelBase
     public MainWindowViewModel()
     {
         // Set initial view model to SlotMachineViewModel
-        _currentViewModel = new SlotMachineViewModel();
+        var slotMachineViewModel = new SlotMachineViewModel();
+        slotMachineViewModel.OnTerminalSwitchRequested += ShowTerminal;
+        CurrentViewModel = slotMachineViewModel;
     }
 
     [RelayCommand]

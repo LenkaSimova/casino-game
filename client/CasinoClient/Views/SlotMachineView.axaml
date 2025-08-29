@@ -6,11 +6,9 @@
        xmlns:vm="using:CasinoClient.ViewModels"
        mc:Ignorable="d"
        d:DesignWidth="400" d:DesignHeight="450"
-       x:DataType="vm:SlotMachineViewModel">
-
-  <UserControl.DataContext>
-    <vm:SlotMachineViewModel />
-  </UserControl.DataContext>
+       x:DataType="vm:SlotMachineViewModel"
+       Focusable="True"
+       IsTabStop="True">
 
   <UserControl.Styles>
     <Style Selector="Button.slot-button">

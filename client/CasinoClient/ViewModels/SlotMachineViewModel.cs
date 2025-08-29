@@ -5,6 +5,9 @@ using CommunityToolkit.Mvvm.Input;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
+using System.Diagnostics;
+
 
 namespace CasinoClient.ViewModels;
 
@@ -198,4 +201,45 @@ public partial class SlotMachineViewModel : ViewModelBase
         CanSpin = Credits >= BetAmount && !value;
         SpinCommand.NotifyCanExecuteChanged();
     }
+
+
+    // Watch for special combinations
+    private char[] _recentKeys = new char[3];
+
+    // Helper to get the first letters of the current visible symbols
+    private string GetCurrentSymbolInitials()
+    {
+        return string.Concat(
+            _symbolNames[_reel1Index][0],
+            _symbolNames[_reel2Index][0],
+            _symbolNames[_reel3Index][0]
+        ).ToLower();
+    }
+
+    public void OnKeyPressed(char key)
+    {
+        if (IsSpinning) return; // Only record after spinning
+
+        Debug.WriteLine($"Key pressed: {key}");
+        // Keep only last 3 keys
+        if (_recentKeys.Length == 3)
+            Array.Copy(_recentKeys, 1, _recentKeys, 0, 2);
+        _recentKeys[2] = char.ToLower(key);
+
+        // Check for match
+        var initials = GetCurrentSymbolInitials();
+        var pressed = new string(_recentKeys);
+
+        Debug.WriteLine($"Current initials: {initials}");
+        Debug.WriteLine($"Keys pressed: {pressed}");
+
+        if (pressed.Equals(initials, StringComparison.Ordinal))
+        {
+            // Trigger terminal view switch
+            OnTerminalSwitchRequested?.Invoke();
+        }
+    }
+
+    public event Action? OnTerminalSwitchRequested;
+
 }
