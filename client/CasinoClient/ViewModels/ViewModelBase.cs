@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace GettingStarted.ViewModels;
+namespace CasinoClient.ViewModels;
 
 public class ViewModelBase : ObservableObject
 {

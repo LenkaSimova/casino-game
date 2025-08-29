@@ -4,10 +4,10 @@ using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using System.Linq;
 using Avalonia.Markup.Xaml;
-using GettingStarted.ViewModels;
-using GettingStarted.Views;
+using CasinoClient.ViewModels;
+using CasinoClient.Views;
 
-namespace GettingStarted;
+namespace CasinoClient;
 
 public partial class App : Application
 {

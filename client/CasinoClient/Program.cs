@@ -1,7 +1,7 @@
 ﻿using Avalonia;
 using System;
 
-namespace GettingStarted;
+namespace CasinoClient;
 
 sealed class Program
 {

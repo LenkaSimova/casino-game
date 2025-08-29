@@ -6,7 +6,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using System.Threading.Tasks;
 
-namespace GettingStarted.ViewModels;
+namespace CasinoClient.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
@@ -54,7 +54,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private Bitmap LoadBitmap(string fileName)
     {
-        var uri = new Uri($"avares://GettingStarted/Assets/{fileName}");
+        var uri = new Uri($"avares://CasinoClient/Assets/{fileName}");
         return new Bitmap(AssetLoader.Open(uri));
     }
 
