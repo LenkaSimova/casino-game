@@ -224,7 +224,6 @@ public partial class SlotMachineViewModel : ViewModelBase
     {
         if (IsSpinning) return; // Only record after spinning
 
-        Debug.WriteLine($"Key pressed: {key}");
         // Keep only last 3 keys
         if (_recentKeys.Length == 3)
             Array.Copy(_recentKeys, 1, _recentKeys, 0, 2);
@@ -233,9 +232,6 @@ public partial class SlotMachineViewModel : ViewModelBase
         // Check for match
         var initials = GetCurrentSymbolInitials();
         var pressed = new string(_recentKeys);
-
-        Debug.WriteLine($"Current initials: {initials}");
-        Debug.WriteLine($"Keys pressed: {pressed}");
 
         if (pressed.Equals(initials, StringComparison.Ordinal))
         {
