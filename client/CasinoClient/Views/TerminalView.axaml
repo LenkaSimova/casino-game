@@ -3,9 +3,84 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:CasinoClient.ViewModels"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
              x:Class="CasinoClient.Views.TerminalView"
              x:DataType="vm:TerminalViewModel">
 
-  Welcome to Terminal!
+  <UserControl.Styles>
+    <!-- Terminal window style -->
+    <Style Selector="Border.terminal-window">
+      <Setter Property="Background" Value="#1E1E1E"/>
+      <Setter Property="BorderBrush" Value="#333333"/>
+      <Setter Property="BorderThickness" Value="2"/>
+      <Setter Property="CornerRadius" Value="4"/>
+    </Style>
+
+    <!-- Terminal text styles -->
+    <Style Selector="TextBlock.terminal-text">
+      <Setter Property="FontFamily" Value="Consolas, Monaco, 'Courier New', monospace"/>
+      <Setter Property="FontSize" Value="14"/>
+      <Setter Property="Foreground" Value="#F0F0F0"/>
+    </Style>
+
+    <Style Selector="TextBlock.terminal-prompt">
+      <Setter Property="FontFamily" Value="Consolas, Monaco, 'Courier New', monospace"/>
+      <Setter Property="FontSize" Value="14"/>
+      <Setter Property="Foreground" Value="#00FF00"/>
+    </Style>
+
+    <Style Selector="TextBlock.terminal-system">
+      <Setter Property="FontFamily" Value="Consolas, Monaco, 'Courier New', monospace"/>
+      <Setter Property="FontSize" Value="14"/>
+      <Setter Property="Foreground" Value="#FFD700"/>
+    </Style>
+
+    <Style Selector="TextBlock.terminal-error">
+      <Setter Property="FontFamily" Value="Consolas, Monaco, 'Courier New', monospace"/>
+      <Setter Property="FontSize" Value="14"/>
+      <Setter Property="Foreground" Value="#FF6B6B"/>
+    </Style>
+
+    <Style Selector="TextBox.terminal-input">
+      <Setter Property="FontFamily" Value="Consolas, Monaco, 'Courier New', monospace"/>
+      <Setter Property="FontSize" Value="14"/>
+      <Setter Property="Foreground" Value="#F0F0F0"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="CaretBrush" Value="#F0F0F0"/>
+    </Style>
+  </UserControl.Styles>
+
+  <Border Classes="terminal-window" Padding="10">
+    <Grid RowDefinitions="*,Auto">
+      
+      <!-- Terminal output area -->
+      <ScrollViewer Grid.Row="0" 
+                    Name="TerminalScroller"
+                    VerticalScrollBarVisibility="Auto"
+                    HorizontalScrollBarVisibility="Auto">
+        <ItemsControl ItemsSource="{Binding TerminalLines}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <StackPanel Orientation="Horizontal" Margin="0,1">
+                <TextBlock Text="{Binding Text}" Classes="terminal-text"/>
+              </StackPanel>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </ScrollViewer>
+
+      <!-- Input area -->
+      <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,5,0,0">
+        <TextBlock Text="{Binding Prompt}" Classes="terminal-prompt"/>
+        <TextBox Classes="terminal-input" 
+                 Text="{Binding CurrentInput}"
+                 Name="CommandInput"
+                 MinWidth="400"/>
+      </StackPanel>
+      
+    </Grid>
+  </Border>
+
 </UserControl>

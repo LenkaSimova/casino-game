@@ -14,17 +14,36 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty]
     private ViewModelBase _currentViewModel;
 
+    private SlotMachineViewModel? _slotMachineViewModel;
+
     public MainWindowViewModel()
     {
         // Set initial view model to SlotMachineViewModel
-        var slotMachineViewModel = new SlotMachineViewModel();
-        slotMachineViewModel.OnTerminalSwitchRequested += ShowTerminal;
-        CurrentViewModel = slotMachineViewModel;
+        _slotMachineViewModel = new SlotMachineViewModel();
+        _slotMachineViewModel.OnTerminalSwitchRequested += ShowTerminal;
+        CurrentViewModel = _slotMachineViewModel;
     }
 
     [RelayCommand]
     private void ShowTerminal()
     {
-        CurrentViewModel = new TerminalViewModel();
+        var terminalViewModel = new TerminalViewModel();
+        terminalViewModel.OnExitRequested += ShowSlotMachine;
+        CurrentViewModel = terminalViewModel;
+    }
+
+    [RelayCommand]
+    private void ShowSlotMachine()
+    {
+        if (_slotMachineViewModel != null)
+        {
+            CurrentViewModel = _slotMachineViewModel;
+        }
+        else
+        {
+            _slotMachineViewModel = new SlotMachineViewModel();
+            _slotMachineViewModel.OnTerminalSwitchRequested += ShowTerminal;
+            CurrentViewModel = _slotMachineViewModel;
+        }
     }
 }
