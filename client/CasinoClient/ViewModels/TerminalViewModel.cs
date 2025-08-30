@@ -32,6 +32,7 @@ public partial class TerminalViewModel : ViewModelBase
 
     private readonly Dictionary<string, Func<string[], Task<string>>> _commands = new();
 
+
     private TerminalConfig _config = new();
 
 
@@ -93,6 +94,14 @@ public partial class TerminalViewModel : ViewModelBase
         {
             var command = parts[0].ToLower();
             var args = parts.Skip(1).ToArray();
+
+            // Check if command is allowed for this terminal
+            if (!_config.AllowedCommands.Contains(command))
+            {
+                AddOutput($"Access denied: Command '{command}' not available on this terminal.", TerminalLineType.Error);
+                CurrentInput = "";
+                return;
+            }
 
             if (_commands.ContainsKey(command))
             {
