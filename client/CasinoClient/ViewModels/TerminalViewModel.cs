@@ -196,7 +196,7 @@ public partial class TerminalViewModel : ViewModelBase
         help.AppendLine("Available commands:");
 
         // List all available commands
-        foreach (var command in _config.AllowedCommands.Where(c => _commandDescriptions.ContainsKey(c)).OrderBy(c => c))
+        foreach (var command in _config.AllowedCommands.Where(c => _commandDescriptions.ContainsKey(c)))
         {
             var description = _commandDescriptions[command];
             help.AppendLine($"  {command.PadRight(12)} - {description}");
@@ -280,7 +280,7 @@ public partial class TerminalViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            return $"Error uploading video: {ex.Message}";
+            return $"Error uploading video.";
         }
     }
 
