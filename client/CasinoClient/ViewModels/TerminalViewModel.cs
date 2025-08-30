@@ -8,6 +8,8 @@ using Avalonia.Data.Converters;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Threading.Tasks;
+using CasinoClient.Models;
+using CasinoClient.Services;
 
 namespace CasinoClient.ViewModels;
 
@@ -20,7 +22,7 @@ public partial class TerminalViewModel : ViewModelBase
     private ObservableCollection<TerminalLine> _terminalLines = new();
 
     [ObservableProperty]
-    private string _prompt = "casino@terminal:~$ ";
+    private string _prompt = "casino@terminal:~$ "; // Default prompt, will be overridden by config
 
     [ObservableProperty]
     private bool _isInputFocused = true;
@@ -30,10 +32,20 @@ public partial class TerminalViewModel : ViewModelBase
 
     private readonly Dictionary<string, Func<string[], Task<string>>> _commands = new();
 
+    private TerminalConfig _config = new();
+
+
     public TerminalViewModel()
     {
+        LoadConfiguration();
         InitializeCommands();
         AddWelcomeMessage();
+    }
+
+    private void LoadConfiguration()
+    {
+        _config = ConfigurationService.LoadConfig();
+        Prompt = _config.Prompt;
     }
 
     private void InitializeCommands()
