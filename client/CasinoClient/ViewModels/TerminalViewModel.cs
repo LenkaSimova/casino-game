@@ -10,8 +10,16 @@ using CommunityToolkit.Mvvm.Input;
 using System.Threading.Tasks;
 using CasinoClient.Models;
 using CasinoClient.Services;
+using Refit;
+
 
 namespace CasinoClient.ViewModels;
+
+public interface IVideoApi
+{
+    [Post("/video/upload")]
+    Task<ApiResponse<string>> UploadVideo([AliasAs("device")] int device);
+}
 
 public partial class TerminalViewModel : ViewModelBase
 {
@@ -61,6 +69,8 @@ public partial class TerminalViewModel : ViewModelBase
         _commands["security"] = HandleSecurityCommand;
         _commands["vault"] = HandleVaultCommand;
         _commands["exit"] = HandleExitCommand;
+        _commands["uploadvideo"] = HandleUploadVideoCommand;
+
 
         // Initialize command descriptions
         _commandDescriptions["help"] = "Show this help message";
@@ -71,6 +81,7 @@ public partial class TerminalViewModel : ViewModelBase
         _commandDescriptions["security"] = "Access security systems";
         _commandDescriptions["vault"] = "Access vault controls";
         _commandDescriptions["exit"] = "Return to slot machine";
+        _commandDescriptions["uploadvideo"] = "Upload video";
     }
 
     private void AddWelcomeMessage()
@@ -250,6 +261,27 @@ public partial class TerminalViewModel : ViewModelBase
         // Trigger returning to slot machine view
         OnExitRequested?.Invoke();
         return Task.FromResult("Returning to slot machine...");
+    }
+
+    private async Task<string> HandleUploadVideoCommand(string[] args)
+    {
+        try
+        {
+            var api = RestService.For<IVideoApi>("http://localhost:5122");
+            var response = await api.UploadVideo(_config.Id);
+            if (response.IsSuccessStatusCode)
+            {
+                return "Video upload successful!";
+            }
+            else
+            {
+                return $"Video upload failed: {response.StatusCode}";
+            }
+        }
+        catch (Exception ex)
+        {
+            return $"Error uploading video: {ex.Message}";
+        }
     }
 
     public event Action? OnExitRequested;
