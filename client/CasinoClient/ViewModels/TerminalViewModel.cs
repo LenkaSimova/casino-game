@@ -31,6 +31,7 @@ public partial class TerminalViewModel : ViewModelBase
     private int _historyIndex = -1;
 
     private readonly Dictionary<string, Func<string[], Task<string>>> _commands = new();
+    private readonly Dictionary<string, string> _commandDescriptions = new();
 
 
     private TerminalConfig _config = new();
@@ -51,6 +52,7 @@ public partial class TerminalViewModel : ViewModelBase
 
     private void InitializeCommands()
     {
+        // Assign command handlers
         _commands["help"] = HandleHelpCommand;
         _commands["clear"] = HandleClearCommand;
         _commands["echo"] = HandleEchoCommand;
@@ -59,6 +61,16 @@ public partial class TerminalViewModel : ViewModelBase
         _commands["security"] = HandleSecurityCommand;
         _commands["vault"] = HandleVaultCommand;
         _commands["exit"] = HandleExitCommand;
+
+        // Initialize command descriptions
+        _commandDescriptions["help"] = "Show this help message";
+        _commandDescriptions["clear"] = "Clear the terminal screen";
+        _commandDescriptions["echo"] = "Echo text back to terminal";
+        _commandDescriptions["status"] = "Show system status";
+        _commandDescriptions["camera"] = "Access security camera controls";
+        _commandDescriptions["security"] = "Access security systems";
+        _commandDescriptions["vault"] = "Access vault controls";
+        _commandDescriptions["exit"] = "Return to slot machine";
     }
 
     private void AddWelcomeMessage()
@@ -171,14 +183,14 @@ public partial class TerminalViewModel : ViewModelBase
     {
         var help = new StringBuilder();
         help.AppendLine("Available commands:");
-        help.AppendLine("  help          - Show this help message");
-        help.AppendLine("  clear         - Clear the terminal screen");
-        help.AppendLine("  echo <text>   - Echo text back to terminal");
-        help.AppendLine("  status        - Show system status");
-        help.AppendLine("  camera <id>   - Access security camera controls");
-        help.AppendLine("  security      - Access security systems");
-        help.AppendLine("  vault         - Access vault controls");
-        help.AppendLine("  exit          - Return to slot machine");
+
+        // List all available commands
+        foreach (var command in _config.AllowedCommands.Where(c => _commandDescriptions.ContainsKey(c)).OrderBy(c => c))
+        {
+            var description = _commandDescriptions[command];
+            help.AppendLine($"  {command.PadRight(12)} - {description}");
+        }
+
         help.AppendLine("");
         help.AppendLine("Use arrow keys to navigate command history.");
         return Task.FromResult(help.ToString());
