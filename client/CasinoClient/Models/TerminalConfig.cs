@@ -8,4 +8,5 @@ public class TerminalConfig
     public string Name { get; set; } = "";
     public List<string> AllowedCommands { get; set; } = new();
     public string Prompt { get; set; } = "casino@terminal:~$ ";
+    public string ServerBaseUrl { get; set; } = "http://localhost:5122";
 }

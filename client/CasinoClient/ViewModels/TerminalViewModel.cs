@@ -12,14 +12,10 @@ using CasinoClient.Models;
 using CasinoClient.Services;
 using Refit;
 
+using CasinoClient.Services.Apis;
+
 
 namespace CasinoClient.ViewModels;
-
-public interface IVideoApi
-{
-    [Post("/video/upload")]
-    Task<ApiResponse<string>> UploadVideo([AliasAs("device")] int device);
-}
 
 public partial class TerminalViewModel : ViewModelBase
 {
@@ -65,11 +61,11 @@ public partial class TerminalViewModel : ViewModelBase
         _commands["clear"] = HandleClearCommand;
         _commands["echo"] = HandleEchoCommand;
         _commands["status"] = HandleStatusCommand;
-        _commands["camera"] = HandleCameraCommand;
         _commands["security"] = HandleSecurityCommand;
         _commands["vault"] = HandleVaultCommand;
         _commands["exit"] = HandleExitCommand;
         _commands["uploadvideo"] = HandleUploadVideoCommand;
+        _commands["loopvideo"] = HandleLoopVideoCommand;
 
 
         // Initialize command descriptions
@@ -77,11 +73,11 @@ public partial class TerminalViewModel : ViewModelBase
         _commandDescriptions["clear"] = "Clear the terminal screen";
         _commandDescriptions["echo"] = "Echo text back to terminal";
         _commandDescriptions["status"] = "Show system status";
-        _commandDescriptions["camera"] = "Access security camera controls";
         _commandDescriptions["security"] = "Access security systems";
         _commandDescriptions["vault"] = "Access vault controls";
         _commandDescriptions["exit"] = "Return to slot machine";
         _commandDescriptions["uploadvideo"] = "Upload video";
+        _commandDescriptions["loopvideo"] = "Loop video";
     }
 
     private void AddWelcomeMessage()
@@ -223,29 +219,6 @@ public partial class TerminalViewModel : ViewModelBase
         return Task.FromResult("System Status: ONLINE\nSecurity Level: HIGH\nActive Connections: 3\nLast Update: " + DateTime.Now.ToString("HH:mm:ss"));
     }
 
-    private Task<string> HandleCameraCommand(string[] args)
-    {
-        if (args.Length == 0)
-        {
-            return Task.FromResult("Available cameras: CAM01, CAM02, CAM03, CAM04\nUsage: camera <id> [loop|stop|status]");
-        }
-
-        var cameraId = args[0].ToUpper();
-        var action = args.Length > 1 ? args[1].ToLower() : "status";
-
-        switch (action)
-        {
-            case "loop":
-                return Task.FromResult($"Camera {cameraId}: Switching to loop playback...");
-            case "stop":
-                return Task.FromResult($"Camera {cameraId}: Stopping loop playback...");
-            case "status":
-                return Task.FromResult($"Camera {cameraId}: ACTIVE - Live feed");
-            default:
-                return Task.FromResult($"Unknown camera action: {action}");
-        }
-    }
-
     private Task<string> HandleSecurityCommand(string[] args)
     {
         return Task.FromResult("Security System Access:\n- All sectors: SECURE\n- Motion detectors: ACTIVE\n- Door locks: ENGAGED\n\nNo security breaches detected.");
@@ -267,7 +240,7 @@ public partial class TerminalViewModel : ViewModelBase
     {
         try
         {
-            var api = RestService.For<IVideoApi>("http://localhost:5122");
+            var api = RestService.For<IVideoApi>(_config.ServerBaseUrl);
             var response = await api.UploadVideo(_config.Id);
             if (response.IsSuccessStatusCode)
             {
@@ -281,6 +254,28 @@ public partial class TerminalViewModel : ViewModelBase
         catch (Exception ex)
         {
             return $"Error uploading video.";
+        }
+    }
+
+    private async Task<string> HandleLoopVideoCommand(string[] args)
+    {
+        try
+        {
+            var api = RestService.For<IVideoApi>(_config.ServerBaseUrl);
+            var response = await api.LoopVideo(_config.Id);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return "Video loop started successfully!";
+            }
+            else
+            {
+                return $"Video loop failed: {response.StatusCode}";
+            }
+        }
+        catch (Exception ex)
+        {
+            return $"Error starting video loop.";
         }
     }
 
