@@ -13,6 +13,7 @@ using CasinoClient.Services;
 using Refit;
 
 using CasinoClient.Services.Apis;
+using System.Net.Http;
 
 
 namespace CasinoClient.ViewModels;
@@ -66,6 +67,10 @@ public partial class TerminalViewModel : ViewModelBase
         _commands["exit"] = HandleExitCommand;
         _commands["uploadvideo"] = HandleUploadVideoCommand;
         _commands["loopvideo"] = HandleLoopVideoCommand;
+        _commands["musicon"] = HandleMusicOnCommand;
+        _commands["lightson"] = HandleLightsOnCommand;
+        _commands["askllm"] = HandleAskLLMCommand;
+        _commands["updatequery"] = HandleResetLLMCommand;
 
 
         // Initialize command descriptions
@@ -78,6 +83,12 @@ public partial class TerminalViewModel : ViewModelBase
         _commandDescriptions["exit"] = "Return to slot machine";
         _commandDescriptions["uploadvideo"] = "Upload video";
         _commandDescriptions["loopvideo"] = "Loop video";
+        _commandDescriptions["uploadvideo"] = "Upload video";
+        _commandDescriptions["loopvideo"] = "Loop video";
+        _commandDescriptions["musicon"] = "Turn the music on";
+        _commandDescriptions["lightson"] = "Turn the disco lights on";
+        _commandDescriptions["askllm"] = "Ask LLM a question";
+        _commandDescriptions["updatequery"] = "Update LLM query";
     }
 
     private void AddWelcomeMessage()
@@ -236,48 +247,96 @@ public partial class TerminalViewModel : ViewModelBase
         return Task.FromResult("Returning to slot machine...");
     }
 
-    private async Task<string> HandleUploadVideoCommand(string[] args)
+
+    private async Task<string> HandleApiCommand<T>(Func<T, Task<ApiResponse<string>>> apiCall, string successMessage, string operation, bool showContent = false)
     {
         try
         {
-            var api = RestService.For<IVideoApi>(_config.ServerBaseUrl);
-            var response = await api.UploadVideo(_config.Id);
+            var api = RestService.For<T>(_config.ServerBaseUrl);
+            var response = await apiCall(api);
+
             if (response.IsSuccessStatusCode)
             {
-                return "Video upload successful!";
+                if (showContent && !string.IsNullOrEmpty(response.Content))
+                {
+                    return $"{successMessage}\n\nResponse:\n{response.Content}";
+                }
+                return successMessage;
             }
             else
             {
-                return $"Video upload failed: {response.StatusCode}";
+                return $"{operation} failed: {response.StatusCode}";
             }
         }
         catch (Exception ex)
         {
-            return $"Error uploading video.";
+            return $"Error during {operation.ToLower()}: {ex.Message}";
         }
+    }
+
+    private async Task<string> HandleUploadVideoCommand(string[] args)
+    {
+        return await HandleApiCommand<IVideoApi>(
+            api => api.UploadVideo(_config.Id),
+            "Video upload successful!",
+            "Video upload"
+        );
     }
 
     private async Task<string> HandleLoopVideoCommand(string[] args)
     {
-        try
-        {
-            var api = RestService.For<IVideoApi>(_config.ServerBaseUrl);
-            var response = await api.LoopVideo(_config.Id);
-
-            if (response.IsSuccessStatusCode)
-            {
-                return "Video loop started successfully!";
-            }
-            else
-            {
-                return $"Video loop failed: {response.StatusCode}";
-            }
-        }
-        catch (Exception ex)
-        {
-            return $"Error starting video loop.";
-        }
+        return await HandleApiCommand<IVideoApi>(
+            api => api.LoopVideo(_config.Id),
+            "Video loop started successfully!",
+            "Video loop"
+        );
     }
+
+    private async Task<string> HandleMusicOnCommand(string[] args)
+    {
+        return await HandleApiCommand<IDiscoApi>(
+            api => api.MusicOn(_config.Id),
+            "The music is playing!",
+            "Turn on music"
+        );
+    }
+
+    private async Task<string> HandleLightsOnCommand(string[] args)
+    {
+        return await HandleApiCommand<IDiscoApi>(
+            api => api.LightsOn(_config.Id),
+            "The lights are on!",
+            "Turn on lights"
+        );
+    }
+
+    // New LLM API commands
+    private async Task<string> HandleAskLLMCommand(string[] args)
+    {
+        if (args.Length == 0)
+        {
+            return "Usage: askllm <question>";
+        }
+
+        var question = string.Join(" ", args);
+        return await HandleApiCommand<ILLMApi>(
+            api => api.Query(_config.Id, question),
+            "Question sent to LLM successfully!",
+            "Query LLM",
+            showContent: true
+        );
+    }
+
+    private async Task<string> HandleResetLLMCommand(string[] args)
+    {
+        return await HandleApiCommand<ILLMApi>(
+            api => api.UpdatePassword(_config.Id),
+            "LLM query updated successfully!",
+            "Update LLM query"
+        );
+    }
+
+
 
     public event Action? OnExitRequested;
 }
