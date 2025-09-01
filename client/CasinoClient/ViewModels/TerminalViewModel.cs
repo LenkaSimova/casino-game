@@ -100,7 +100,7 @@ public partial class TerminalViewModel : ViewModelBase
 
     private void ShowPrompt(string prompt_text = "")
     {
-        TerminalLines.Add(new TerminalLine(Prompt + prompt_text, TerminalLineType.Prompt, isInput: true));
+        TerminalLines.Add(new TerminalLine(Prompt + prompt_text, TerminalLineType.Normal, isInput: true));
     }
 
     [RelayCommand]
@@ -364,28 +364,29 @@ public enum TerminalLineType
     Success
 }
 
-public class TerminalLineTypeToStyleConverter : IMultiValueConverter
+public class TerminalLineTypeToStringConverter : IValueConverter
 {
-    public static readonly TerminalLineTypeToStyleConverter Instance = new();
+    public static readonly TerminalLineTypeToStringConverter Instance = new();
 
-    public object Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        if (values?.Count >= 2 &&
-            values[0] is TerminalLineType type &&
-            values[1] is bool isInput)
+        if (value is TerminalLine line)
         {
-            if (isInput)
-                return "terminal-prompt";
-
-            return type switch
+            return line.Type switch
             {
-                TerminalLineType.Prompt => "terminal-prompt",
-                TerminalLineType.System => "terminal-system",
-                TerminalLineType.Error => "terminal-error",
-                _ => "terminal-text"
+                TerminalLineType.Prompt => "prompt",
+                TerminalLineType.System => "system",
+                TerminalLineType.Error => "error",
+                TerminalLineType.Success => "success",
+                _ => "normal"
             };
         }
 
-        return "terminal-text";
+        return "normal";
+    }
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
     }
 }

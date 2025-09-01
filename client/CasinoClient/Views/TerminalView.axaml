@@ -6,6 +6,10 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
              x:Class="CasinoClient.Views.TerminalView"
              x:DataType="vm:TerminalViewModel">
+             
+  <UserControl.Resources>
+    <vm:TerminalLineTypeToStringConverter x:Key="TerminalLineTypeToStringConverter"/>
+  </UserControl.Resources>
 
   <UserControl.Styles>
     <!-- Terminal window style -->
@@ -16,29 +20,32 @@
       <Setter Property="CornerRadius" Value="4"/>
     </Style>
 
-    <!-- Terminal text styles -->
-    <Style Selector="TextBlock.terminal-text">
+   <!-- Base terminal text style -->
+    <Style Selector="TextBlock.terminal-line">
       <Setter Property="FontFamily" Value="Consolas, Monaco, 'Courier New', monospace"/>
       <Setter Property="FontSize" Value="14"/>
       <Setter Property="Foreground" Value="#F0F0F0"/>
     </Style>
 
-    <Style Selector="TextBlock.terminal-prompt">
-      <Setter Property="FontFamily" Value="Consolas, Monaco, 'Courier New', monospace"/>
-      <Setter Property="FontSize" Value="14"/>
+    <!-- Terminal text styles based on Tag -->
+    <Style Selector="TextBlock.terminal-line[Tag=normal]">
+      <Setter Property="Foreground" Value="#F0F0F0"/>
+    </Style>
+
+    <Style Selector="TextBlock.terminal-line[Tag=prompt]">
       <Setter Property="Foreground" Value="#00FF00"/>
     </Style>
 
-    <Style Selector="TextBlock.terminal-system">
-      <Setter Property="FontFamily" Value="Consolas, Monaco, 'Courier New', monospace"/>
-      <Setter Property="FontSize" Value="14"/>
+    <Style Selector="TextBlock.terminal-line[Tag=system]">
       <Setter Property="Foreground" Value="#FFD700"/>
     </Style>
 
-    <Style Selector="TextBlock.terminal-error">
-      <Setter Property="FontFamily" Value="Consolas, Monaco, 'Courier New', monospace"/>
-      <Setter Property="FontSize" Value="14"/>
+    <Style Selector="TextBlock.terminal-line[Tag=error]">
       <Setter Property="Foreground" Value="#FF6B6B"/>
+    </Style>
+
+    <Style Selector="TextBlock.terminal-line[Tag=success]">
+      <Setter Property="Foreground" Value="#90EE90"/>
     </Style>
 
     <Style Selector="TextBox.terminal-input">
@@ -62,9 +69,11 @@
                     HorizontalScrollBarVisibility="Auto">
         <ItemsControl ItemsSource="{Binding TerminalLines}">
           <ItemsControl.ItemTemplate>
-            <DataTemplate>
+            <DataTemplate x:DataType="vm:TerminalLine">
               <StackPanel Orientation="Horizontal" Margin="0,1">
-                <TextBlock Text="{Binding Text}" Classes="terminal-text"/>
+                <TextBlock Text="{Binding Text}" 
+                          Classes="terminal-line"
+                          Tag="{Binding ., Converter={StaticResource TerminalLineTypeToStringConverter}}"/>
               </StackPanel>
             </DataTemplate>
           </ItemsControl.ItemTemplate>
@@ -73,7 +82,7 @@
 
       <!-- Input area -->
       <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,5,0,0">
-        <TextBlock Text="{Binding Prompt}" Classes="terminal-prompt"/>
+        <TextBlock Text="{Binding Prompt}" Classes="terminal-line" Tag="prompt"/>
         <TextBox Classes="terminal-input" 
                  Text="{Binding CurrentInput}"
                  Name="CommandInput"
