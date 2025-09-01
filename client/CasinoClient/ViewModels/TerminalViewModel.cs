@@ -35,7 +35,7 @@ public partial class TerminalViewModel : ViewModelBase
     private readonly List<string> _commandHistory = new();
     private int _historyIndex = -1;
 
-    private readonly Dictionary<string, Func<string[], Task<string>>> _commands = new();
+    private readonly Dictionary<string, Func<string[], Task<CommandResult>>> _commands = new();
     private readonly Dictionary<string, string> _commandDescriptions = new();
 
 
@@ -138,9 +138,11 @@ public partial class TerminalViewModel : ViewModelBase
                 try
                 {
                     var result = await _commands[command](args);
-                    if (!string.IsNullOrEmpty(result))
+                    if (!string.IsNullOrEmpty(result.Message))
                     {
-                        AddOutput(result);
+                        // Use the IsSuccess property to determine the message type
+                        var messageType = result.IsSuccess ? TerminalLineType.Normal : TerminalLineType.Error;
+                        AddOutput(result.Message, messageType);
                     }
                 }
                 catch (Exception ex)
@@ -197,7 +199,7 @@ public partial class TerminalViewModel : ViewModelBase
     }
 
     // Command Handlers
-    private Task<string> HandleHelpCommand(string[] args)
+    private Task<CommandResult> HandleHelpCommand(string[] args)
     {
         var help = new StringBuilder();
         help.AppendLine("Available commands:");
@@ -211,44 +213,44 @@ public partial class TerminalViewModel : ViewModelBase
 
         help.AppendLine("");
         help.AppendLine("Use arrow keys to navigate command history.");
-        return Task.FromResult(help.ToString());
+        return Task.FromResult(new CommandResult(true, help.ToString()));
     }
 
-    private Task<string> HandleClearCommand(string[] args)
+    private Task<CommandResult> HandleClearCommand(string[] args)
     {
         TerminalLines.Clear();
-        return Task.FromResult("");
+        return Task.FromResult(new CommandResult(true, ""));
     }
 
-    private Task<string> HandleEchoCommand(string[] args)
+    private Task<CommandResult> HandleEchoCommand(string[] args)
     {
-        return Task.FromResult(string.Join(" ", args));
+        return Task.FromResult(new CommandResult(true, string.Join(" ", args)));
     }
 
-    private Task<string> HandleStatusCommand(string[] args)
+    private Task<CommandResult> HandleStatusCommand(string[] args)
     {
-        return Task.FromResult("System Status: ONLINE\nSecurity Level: HIGH\nActive Connections: 3\nLast Update: " + DateTime.Now.ToString("HH:mm:ss"));
+        return Task.FromResult(new CommandResult(true, "System Status: ONLINE\nSecurity Level: HIGH\nActive Connections: 3\nLast Update: " + DateTime.Now.ToString("HH:mm:ss")));
     }
 
-    private Task<string> HandleSecurityCommand(string[] args)
+    private Task<CommandResult> HandleSecurityCommand(string[] args)
     {
-        return Task.FromResult("Security System Access:\n- All sectors: SECURE\n- Motion detectors: ACTIVE\n- Door locks: ENGAGED\n\nNo security breaches detected.");
+        return Task.FromResult(new CommandResult(true, "Security System Access:\n- All sectors: SECURE\n- Motion detectors: ACTIVE\n- Door locks: ENGAGED\n\nNo security breaches detected."));
     }
 
-    private Task<string> HandleVaultCommand(string[] args)
+    private Task<CommandResult> HandleVaultCommand(string[] args)
     {
-        return Task.FromResult("Vault Access: RESTRICTED\nRequired authorization level: ADMIN\nCurrent user level: OPERATOR\n\nAccess denied.");
+        return Task.FromResult(new CommandResult(false, "Vault Access: RESTRICTED\nRequired authorization level: ADMIN\nCurrent user level: OPERATOR\n\nAccess denied."));
     }
 
-    private Task<string> HandleExitCommand(string[] args)
+    private Task<CommandResult> HandleExitCommand(string[] args)
     {
         // Trigger returning to slot machine view
         OnExitRequested?.Invoke();
-        return Task.FromResult("Returning to slot machine...");
+        return Task.FromResult(new CommandResult(true, "Returning to slot machine..."));
     }
 
 
-    private async Task<string> HandleApiCommand<T>(Func<T, Task<ApiResponse<string>>> apiCall, string successMessage, string operation, bool showContent = false)
+    private async Task<CommandResult> HandleApiCommand<T>(Func<T, Task<ApiResponse<string>>> apiCall, string successMessage, string operation, bool showContent = false)
     {
         try
         {
@@ -257,24 +259,29 @@ public partial class TerminalViewModel : ViewModelBase
 
             if (response.IsSuccessStatusCode)
             {
+                string message;
                 if (showContent && !string.IsNullOrEmpty(response.Content))
                 {
-                    return $"{successMessage}\n\nResponse:\n{response.Content}";
+                    message = $"{successMessage}\n\nResponse:\n{response.Content}";
                 }
-                return successMessage;
+                else
+                {
+                    message = successMessage;
+                }
+                return new CommandResult(true, message);
             }
             else
             {
-                return $"{operation} failed: {response.StatusCode}";
+                return new CommandResult(false, $"{operation} failed: {response.StatusCode}");
             }
         }
         catch (Exception ex)
         {
-            return $"Error during {operation.ToLower()}: {ex.Message}";
+            return new CommandResult(false, $"Error during {operation.ToLower()}: {ex.Message}");
         }
     }
 
-    private async Task<string> HandleUploadVideoCommand(string[] args)
+    private async Task<CommandResult> HandleUploadVideoCommand(string[] args)
     {
         return await HandleApiCommand<IVideoApi>(
             api => api.UploadVideo(_config.Id),
@@ -283,7 +290,7 @@ public partial class TerminalViewModel : ViewModelBase
         );
     }
 
-    private async Task<string> HandleLoopVideoCommand(string[] args)
+    private async Task<CommandResult> HandleLoopVideoCommand(string[] args)
     {
         return await HandleApiCommand<IVideoApi>(
             api => api.LoopVideo(_config.Id),
@@ -292,7 +299,7 @@ public partial class TerminalViewModel : ViewModelBase
         );
     }
 
-    private async Task<string> HandleMusicOnCommand(string[] args)
+    private async Task<CommandResult> HandleMusicOnCommand(string[] args)
     {
         return await HandleApiCommand<IDiscoApi>(
             api => api.MusicOn(_config.Id),
@@ -301,7 +308,7 @@ public partial class TerminalViewModel : ViewModelBase
         );
     }
 
-    private async Task<string> HandleLightsOnCommand(string[] args)
+    private async Task<CommandResult> HandleLightsOnCommand(string[] args)
     {
         return await HandleApiCommand<IDiscoApi>(
             api => api.LightsOn(_config.Id),
@@ -310,12 +317,11 @@ public partial class TerminalViewModel : ViewModelBase
         );
     }
 
-    // New LLM API commands
-    private async Task<string> HandleAskLLMCommand(string[] args)
+    private async Task<CommandResult> HandleAskLLMCommand(string[] args)
     {
         if (args.Length == 0)
         {
-            return "Usage: askllm <question>";
+            return new CommandResult(false, "Usage: askllm <question>");
         }
 
         var question = string.Join(" ", args);
@@ -327,7 +333,7 @@ public partial class TerminalViewModel : ViewModelBase
         );
     }
 
-    private async Task<string> HandleResetLLMCommand(string[] args)
+    private async Task<CommandResult> HandleResetLLMCommand(string[] args)
     {
         return await HandleApiCommand<ILLMApi>(
             api => api.UpdatePassword(_config.Id),
@@ -339,6 +345,18 @@ public partial class TerminalViewModel : ViewModelBase
 
 
     public event Action? OnExitRequested;
+}
+
+public class CommandResult
+{
+    public bool IsSuccess { get; }
+    public string Message { get; }
+
+    public CommandResult(bool isSuccess, string message)
+    {
+        IsSuccess = isSuccess;
+        Message = message;
+    }
 }
 
 public class TerminalLine
