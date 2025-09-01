@@ -304,7 +304,7 @@ public partial class TerminalViewModel : ViewModelBase
         return await HandleApiCommand<IDiscoApi>(
             api => api.MusicOn(_config.Id),
             "The music is playing!",
-            "Turn on music"
+            "turning on music"
         );
     }
 
@@ -313,7 +313,7 @@ public partial class TerminalViewModel : ViewModelBase
         return await HandleApiCommand<IDiscoApi>(
             api => api.LightsOn(_config.Id),
             "The lights are on!",
-            "Turn on lights"
+            "turning on lights"
         );
     }
 
@@ -328,7 +328,7 @@ public partial class TerminalViewModel : ViewModelBase
         return await HandleApiCommand<ILLMApi>(
             api => api.Query(_config.Id, question),
             "Question sent to LLM successfully!",
-            "Query LLM",
+            "Querying LLM",
             showContent: true
         );
     }
@@ -338,7 +338,7 @@ public partial class TerminalViewModel : ViewModelBase
         return await HandleApiCommand<ILLMApi>(
             api => api.UpdatePassword(_config.Id),
             "LLM query updated successfully!",
-            "Update LLM query"
+            "Updating LLM query"
         );
     }
 
