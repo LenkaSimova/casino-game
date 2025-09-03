@@ -4,17 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.AI;
 using OllamaSharp;
 
-
-interface ILLMHandler
-{
-    void AddSystemMessage(string systemMessage);
-    Task<string> SendMessageAsync(string userMessage);
-
-    public void ClearHistory();
-
-}
-
-namespace CasinoClient.Services
+namespace CasinoClient.Services.LLMHandlers
 {
     public class LocalLLMHandler : ILLMHandler
     {
