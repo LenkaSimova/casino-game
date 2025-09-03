@@ -155,15 +155,14 @@ public partial class TerminalViewModel : ViewModelBase
             var command = parts[0].ToLower();
             var args = parts.Skip(1).ToArray();
 
-            // Check if command is allowed for this terminal
-            if (!_config.AllowedCommands.Contains(command))
-            {
-                AddOutput($"Access denied: Command '{command}' not available on this terminal.", TerminalLineType.Error);
-                return;
-            }
-
             if (_commands.ContainsKey(command))
             {
+                // Check if command is allowed for this terminal
+                if (!_config.AllowedCommands.Contains(command))
+                {
+                    AddOutput($"Access denied: Command '{command}' not available on this terminal.", TerminalLineType.Error);
+                    return;
+                }
                 try
                 {
                     var result = await _commands[command](args);
