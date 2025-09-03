@@ -3,6 +3,7 @@
 using System.Threading.Tasks;
 using Refit;
 using System;
+using System.Diagnostics;
 
 
 
@@ -17,7 +18,7 @@ namespace CasinoClient.Services.LLMHandlers
         private readonly string _model;
 
 
-        public GeminiLLMHandler(string baseUrl = "https://generativelanguage.googleapis.com", string model = "gemini-2.0-flash")
+        public GeminiLLMHandler(string baseUrl = "https://generativelanguage.googleapis.com", string model = "gemini-2.0-flash-lite")
         {
             _geminiApi = RestService.For<IGeminiApi>(baseUrl);
             _model = model;
@@ -41,7 +42,6 @@ namespace CasinoClient.Services.LLMHandlers
         {
             if (string.IsNullOrWhiteSpace(userMessage))
                 return string.Empty;
-
             var request = new ContentRequest
             {
                 contents = new[]
@@ -52,6 +52,14 @@ namespace CasinoClient.Services.LLMHandlers
                         {
                             new Part { text = userMessage }
                         }
+                    }
+                },
+
+                generationConfig = new GenerationConfig
+                {
+                    thinkingConfig = new ThinkingConfig
+                    {
+                        thinkingBudget = "0"
                     }
                 }
             };

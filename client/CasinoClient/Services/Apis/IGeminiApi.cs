@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 public class ContentRequest
 {
     public Content[] contents { get; set; }
+    public GenerationConfig generationConfig { get; set; }
 }
 
 public class Content
@@ -15,8 +16,15 @@ public class Part
 {
     public string text { get; set; }
 }
+public class GenerationConfig
+{
+    public ThinkingConfig thinkingConfig { get; set; }
+}
 
-
+public class ThinkingConfig
+{
+    public string thinkingBudget { get; set; }
+}
 
 public interface IGeminiApi
 {
