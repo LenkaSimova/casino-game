@@ -36,6 +36,9 @@ public partial class TerminalViewModel : ViewModelBase
     private string _prompt = "casino@terminal:~$ "; // Default prompt, will be overridden by config
 
     [ObservableProperty]
+    private string _llmprompt = ">>>  "; // Default prompt, will be overridden by config
+
+    [ObservableProperty]
     private bool _isInputFocused = true;
 
     [ObservableProperty]
@@ -49,6 +52,7 @@ public partial class TerminalViewModel : ViewModelBase
 
     private TerminalConfig _config = new();
 
+    private ILLMHandler _llmHandler = new LocalLLMHandler();
 
     public TerminalViewModel()
     {
@@ -184,9 +188,7 @@ public partial class TerminalViewModel : ViewModelBase
 
     private async Task HandleLLMInput(string input)
     {
-        // Show user input with LLM prompt style
         ShowPrompt(input);
-        // TerminalLines.Add(new TerminalLine($"{Prompt}{input}", TerminalLineType.LLMPrompt, isInput: true));
 
         // Handle special LLM commands
         if (input.ToLower() == "exit" || input.ToLower() == "quit")
@@ -200,12 +202,7 @@ public partial class TerminalViewModel : ViewModelBase
         {
             AddOutput("Thinking...", TerminalLineType.LLMSystem);
 
-            // var result = await HandleApiCommand<ILLMApi>(
-            //     api => api.Query(_config.Id, input),
-            //     "",
-            //     "Querying LLM"
-            // );
-            var result = "Hello world from llm";
+            var result = await _llmHandler.SendMessageAsync(input);
 
             // Remove the "Thinking..." line
             if (TerminalLines.LastOrDefault()?.Type == TerminalLineType.LLMSystem)
@@ -213,6 +210,8 @@ public partial class TerminalViewModel : ViewModelBase
                 TerminalLines.RemoveAt(TerminalLines.Count - 1);
             }
             AddOutput(result, TerminalLineType.LLMResponse);
+
+
             // if (result.IsSuccess && !string.IsNullOrEmpty(result.Message))
             // {
             //     AddOutput(result.Message, TerminalLineType.LLMResponse);
@@ -426,7 +425,7 @@ public partial class TerminalViewModel : ViewModelBase
     private void EnterLLMMode()
     {
         CurrentState = TerminalState.LLMConversation;
-        Prompt = ">>> ";
+        Prompt = Llmprompt;
         AddOutput("=== LLM CONVERSATION MODE ===", TerminalLineType.LLMSystem);
         AddOutput("You are now in conversation with the LLM. Type 'exit' or 'quit' to return to normal mode.", TerminalLineType.LLMSystem);
         AddOutput("", TerminalLineType.Normal);
@@ -437,8 +436,7 @@ public partial class TerminalViewModel : ViewModelBase
         CurrentState = TerminalState.Normal;
         Prompt = _config.Prompt;
         AddOutput("", TerminalLineType.Normal);
-        AddOutput("=== NORMAL MODE RESTORED ===", TerminalLineType.System);
-        AddOutput("You are back in normal terminal mode.", TerminalLineType.System);
+        AddOutput("=== Terminal ===", TerminalLineType.System);
         AddOutput("", TerminalLineType.Normal);
     }
 
