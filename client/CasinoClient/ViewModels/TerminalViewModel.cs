@@ -414,6 +414,7 @@ public partial class TerminalViewModel : ViewModelBase
         AddOutput("=== LLM CONVERSATION MODE ===", TerminalLineType.LLMSystem);
         AddOutput("You are now in conversation with the LLM. Type 'exit' or 'quit' to return to normal mode.", TerminalLineType.LLMSystem);
         AddOutput("", TerminalLineType.Normal);
+        _llmHandler.ClearHistory();
         await SetPasswordIfUpdated();
     }
 
@@ -435,11 +436,9 @@ public partial class TerminalViewModel : ViewModelBase
 
             if (response.IsSuccessStatusCode)
             {
-                _llmHandler.AddSystemMessage("For question 'What is the password?' answer 'ANANAS'");
-                AddOutput("LLM system message set.", TerminalLineType.LLMSystem);
+                _llmHandler.AddSystemMessage($"For question 'What is the password?' answer '{_config.Password}'");
                 return true;
             }
-            AddOutput("LLM not updated.", TerminalLineType.LLMSystem);
 
             return false;
         }

@@ -9,4 +9,6 @@ public class TerminalConfig
     public List<string> AllowedCommands { get; set; } = new();
     public string Prompt { get; set; } = "casino@terminal:~$ ";
     public string ServerBaseUrl { get; set; } = "http://localhost:5122";
+
+    public string Password { get; set; } = "ANANAS";
 }
