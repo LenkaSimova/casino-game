@@ -18,6 +18,12 @@ using System.Net.Http;
 
 namespace CasinoClient.ViewModels;
 
+public enum TerminalState
+{
+    Normal,
+    LLMConversation
+}
+
 public partial class TerminalViewModel : ViewModelBase
 {
     [ObservableProperty]
@@ -32,12 +38,14 @@ public partial class TerminalViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isInputFocused = true;
 
+    [ObservableProperty]
+    private TerminalState _currentState = TerminalState.Normal;
+
     private readonly List<string> _commandHistory = new();
     private int _historyIndex = -1;
 
     private readonly Dictionary<string, Func<string[], Task<CommandResult>>> _commands = new();
     private readonly Dictionary<string, string> _commandDescriptions = new();
-
 
     private TerminalConfig _config = new();
 
@@ -71,6 +79,7 @@ public partial class TerminalViewModel : ViewModelBase
         _commands["lightson"] = HandleLightsOnCommand;
         _commands["askllm"] = HandleAskLLMCommand;
         _commands["updatequery"] = HandleResetLLMCommand;
+        _commands["llm"] = HandleLLMConversationCommand;
 
 
         // Initialize command descriptions
@@ -89,6 +98,7 @@ public partial class TerminalViewModel : ViewModelBase
         _commandDescriptions["lightson"] = "Turn the disco lights on";
         _commandDescriptions["askllm"] = "Ask LLM a question";
         _commandDescriptions["updatequery"] = "Update LLM query";
+        _commandDescriptions["llm"] = "Start LLM conversation mode";
     }
 
     private void AddWelcomeMessage()
@@ -100,7 +110,8 @@ public partial class TerminalViewModel : ViewModelBase
 
     private void ShowPrompt(string prompt_text = "")
     {
-        TerminalLines.Add(new TerminalLine(Prompt + prompt_text, TerminalLineType.Normal, isInput: true));
+        var promptType = CurrentState == TerminalState.LLMConversation ? TerminalLineType.LLMPrompt : TerminalLineType.Normal;
+        TerminalLines.Add(new TerminalLine(Prompt + prompt_text, promptType, isInput: true));
     }
 
     [RelayCommand]
@@ -112,6 +123,21 @@ public partial class TerminalViewModel : ViewModelBase
             ShowPrompt();
             return;
         }
+
+        if (CurrentState == TerminalState.LLMConversation)
+        {
+            await HandleLLMInput(input);
+        }
+        else
+        {
+            await HandleNormalCommand(input);
+        }
+
+        CurrentInput = "";
+    }
+
+    private async Task HandleNormalCommand(string input)
+    {
         ShowPrompt(input);
 
         // Add to command history
@@ -129,7 +155,6 @@ public partial class TerminalViewModel : ViewModelBase
             if (!_config.AllowedCommands.Contains(command))
             {
                 AddOutput($"Access denied: Command '{command}' not available on this terminal.", TerminalLineType.Error);
-                CurrentInput = "";
                 return;
             }
 
@@ -155,12 +180,62 @@ public partial class TerminalViewModel : ViewModelBase
                 AddOutput($"Command not found: {command}. Type 'help' for available commands.", TerminalLineType.Error);
             }
         }
+    }
 
-        CurrentInput = "";
+    private async Task HandleLLMInput(string input)
+    {
+        // Show user input with LLM prompt style
+        ShowPrompt(input);
+        // TerminalLines.Add(new TerminalLine($"{Prompt}{input}", TerminalLineType.LLMPrompt, isInput: true));
+
+        // Handle special LLM commands
+        if (input.ToLower() == "exit" || input.ToLower() == "quit")
+        {
+            ExitLLMMode();
+            return;
+        }
+
+        // Send to LLM and show response
+        try
+        {
+            AddOutput("Thinking...", TerminalLineType.LLMSystem);
+
+            // var result = await HandleApiCommand<ILLMApi>(
+            //     api => api.Query(_config.Id, input),
+            //     "",
+            //     "Querying LLM"
+            // );
+            var result = "Hello world from llm";
+
+            // Remove the "Thinking..." line
+            if (TerminalLines.LastOrDefault()?.Type == TerminalLineType.LLMSystem)
+            {
+                TerminalLines.RemoveAt(TerminalLines.Count - 1);
+            }
+            AddOutput(result, TerminalLineType.LLMResponse);
+            // if (result.IsSuccess && !string.IsNullOrEmpty(result.Message))
+            // {
+            //     AddOutput(result.Message, TerminalLineType.LLMResponse);
+            // }
+            // else
+            // {
+            //     AddOutput($"LLM Error: {result.Message}", TerminalLineType.Error);
+            // }
+        }
+        catch (Exception ex)
+        {
+            AddOutput($"Error communicating with LLM: {ex.Message}", TerminalLineType.Error);
+        }
     }
 
     public void OnKeyDown(string key)
     {
+        if (CurrentState == TerminalState.LLMConversation)
+        {
+            // In LLM mode, only handle 'exit' or 'quit' commands via Enter key
+            return;
+        }
+
         switch (key)
         {
             case "Up":
@@ -342,6 +417,31 @@ public partial class TerminalViewModel : ViewModelBase
         );
     }
 
+    private Task<CommandResult> HandleLLMConversationCommand(string[] args)
+    {
+        EnterLLMMode();
+        return Task.FromResult(new CommandResult(true, ""));
+    }
+
+    private void EnterLLMMode()
+    {
+        CurrentState = TerminalState.LLMConversation;
+        Prompt = ">>> ";
+        AddOutput("=== LLM CONVERSATION MODE ===", TerminalLineType.LLMSystem);
+        AddOutput("You are now in conversation with the LLM. Type 'exit' or 'quit' to return to normal mode.", TerminalLineType.LLMSystem);
+        AddOutput("", TerminalLineType.Normal);
+    }
+
+    private void ExitLLMMode()
+    {
+        CurrentState = TerminalState.Normal;
+        Prompt = _config.Prompt;
+        AddOutput("", TerminalLineType.Normal);
+        AddOutput("=== NORMAL MODE RESTORED ===", TerminalLineType.System);
+        AddOutput("You are back in normal terminal mode.", TerminalLineType.System);
+        AddOutput("", TerminalLineType.Normal);
+    }
+
 
 
     public event Action? OnExitRequested;
@@ -379,7 +479,10 @@ public enum TerminalLineType
     Prompt,
     System,
     Error,
-    Success
+    Success,
+    LLMPrompt,
+    LLMResponse,
+    LLMSystem
 }
 
 public class TerminalLineTypeToStringConverter : IValueConverter
@@ -396,6 +499,9 @@ public class TerminalLineTypeToStringConverter : IValueConverter
                 TerminalLineType.System => "system",
                 TerminalLineType.Error => "error",
                 TerminalLineType.Success => "success",
+                // TerminalLineType.LLMPrompt => "llm-prompt",
+                // TerminalLineType.LLMResponse => "llm-response",
+                // TerminalLineType.LLMSystem => "llm-system",
                 _ => "normal"
             };
         }
