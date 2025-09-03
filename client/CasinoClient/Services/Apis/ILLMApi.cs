@@ -5,7 +5,7 @@ namespace CasinoClient.Services.Apis;
 
 public interface ILLMApi
 {
-    [Post("/llm/isupdated")]
+    [Get("/llm/isupdated")]
     Task<ApiResponse<string>> IsUpdated([AliasAs("device")] int device);
 
     [Post("/llm/password")]
