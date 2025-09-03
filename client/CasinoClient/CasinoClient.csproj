@@ -7,6 +7,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <AssemblyName>CasinoClient</AssemblyName>
+    <UserSecretsId>08ac2489-1078-41bd-8f51-ba4e46601b8d</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

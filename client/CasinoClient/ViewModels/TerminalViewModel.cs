@@ -52,7 +52,7 @@ public partial class TerminalViewModel : ViewModelBase
 
     private TerminalConfig _config = new();
 
-    private ILLMHandler _llmHandler = new LocalLLMHandler();
+    private ILLMHandler _llmHandler = new GeminiLLMHandler();
 
     public TerminalViewModel()
     {
@@ -441,7 +441,7 @@ public partial class TerminalViewModel : ViewModelBase
 
             return false;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             // do nothing
             return false;
