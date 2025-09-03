@@ -2,8 +2,11 @@
 var builder = WebApplication.CreateBuilder(args);
 var app = builder.Build();
 
-// Initialize game state
-var gameState = new GameState();
+// Initialize persistence service
+var persistence = new GameStatePersistence();
+
+// Load game state from file (or create new if file doesn't exist)
+var gameState = await persistence.LoadGameStateAsync();
 
 // Helper: get device id from query
 string? GetDeviceId(HttpContext ctx)
@@ -76,6 +79,30 @@ app.MapGet("/status", () => new
     gameState.PasswordUpdated,
     gameState.DiscoState,
     gameState.DiscoCompleted
+});
+
+// Admin endpoints for managing saved state
+app.MapPost("/admin/reset", async () =>
+{
+    gameState.VideoUploaded = false;
+    gameState.LoopStarted = false;
+    gameState.PasswordUpdated = false;
+    gameState.DiscoState.Clear();
+    gameState.DiscoCompleted = false;
+    await persistence.SaveGameStateAsync(gameState);
+    return Results.Ok("Game state reset and saved.");
+});
+
+app.MapPost("/admin/save", async () =>
+{
+    await persistence.SaveGameStateAsync(gameState);
+    return Results.Ok("Game state manually saved.");
+});
+
+app.MapDelete("/admin/savedstate", () =>
+{
+    persistence.DeleteSavedState();
+    return Results.Ok("Saved state file deleted.");
 });
 
 app.Run();

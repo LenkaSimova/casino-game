@@ -16,3 +16,16 @@ Webový server přijímá http requesty přes lokální síť a má přehled o s
 Did:
 
 -   dotnet new web -o CasinoServer
+
+## Persistence funkcionality
+
+Server nyní podporuje manuální ukládání a načítání stavu hry do/ze souboru `gamestate.json`:
+
+-   Stav se načte při spuštění serveru (pokud soubor existuje)
+-   Stav se ukládá pouze manuálně pomocí admin endpointů
+
+### Admin endpointy pro správu stavu:
+
+-   `POST /admin/reset` - resetuje celý stav hry a uloží
+-   `POST /admin/save` - manuálně uloží aktuální stav
+-   `DELETE /admin/savedstate` - smaže uložený soubor se stavem

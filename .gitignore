@@ -402,3 +402,4 @@ FodyWeavers.xsd
 .DS_Store
 
 terminal_config.json
+gamestate.json
