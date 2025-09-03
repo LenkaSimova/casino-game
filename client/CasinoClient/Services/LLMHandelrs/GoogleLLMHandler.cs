@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Refit;
 using System;
 using System.Diagnostics;
+using System.Linq;
 
 
 
@@ -17,11 +18,17 @@ namespace CasinoClient.Services.LLMHandlers
         private readonly string _apikey = Environment.GetEnvironmentVariable("GEMINI_API_KEY") ?? throw new InvalidOperationException("GEMINI_API_KEY environment variable is not set");
         private readonly string _model;
 
+        private SystemInstruction _systemInstruction = new SystemInstruction
+        {
+            parts = Array.Empty<Part>()
+        };
+
 
         public GeminiLLMHandler(string baseUrl = "https://generativelanguage.googleapis.com", string model = "gemini-2.0-flash-lite")
         {
             _geminiApi = RestService.For<IGeminiApi>(baseUrl);
             _model = model;
+            AddSystemMessage("Give short answers.");
         }
 
         /// <summary>
@@ -30,7 +37,7 @@ namespace CasinoClient.Services.LLMHandlers
         /// <param name="systemMessage">The system message to add</param>
         public void AddSystemMessage(string systemMessage)
         {
-            // to be implemented
+            _systemInstruction.parts = (_systemInstruction.parts ?? Array.Empty<Part>()).Append(new Part { text = systemMessage }).ToArray();
         }
 
         /// <summary>

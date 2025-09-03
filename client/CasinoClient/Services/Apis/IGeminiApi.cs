@@ -3,27 +3,33 @@ using System.Text.Json;
 using System.Threading.Tasks;
 public class ContentRequest
 {
-    public Content[] contents { get; set; }
-    public GenerationConfig generationConfig { get; set; }
+    public SystemInstruction? systemInstruction { get; set; }
+    public Content[]? contents { get; set; }
+    public GenerationConfig? generationConfig { get; set; }
 }
 
 public class Content
 {
-    public Part[] parts { get; set; }
+    public Part[]? parts { get; set; }
 }
 
 public class Part
 {
-    public string text { get; set; }
+    public string? text { get; set; }
 }
 public class GenerationConfig
 {
-    public ThinkingConfig thinkingConfig { get; set; }
+    public ThinkingConfig? thinkingConfig { get; set; }
 }
 
 public class ThinkingConfig
 {
-    public string thinkingBudget { get; set; }
+    public string? thinkingBudget { get; set; }
+}
+
+public class SystemInstruction
+{
+    public Part[]? parts { get; set; }
 }
 
 public interface IGeminiApi
