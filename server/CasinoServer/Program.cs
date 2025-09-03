@@ -22,6 +22,7 @@ app.MapPost("/video/upload", (HttpContext ctx) =>
     var device = GetDeviceId(ctx);
     if (device != "1") return Results.BadRequest("Only device 1 can confirm upload.");
     gameState.VideoUploaded = true;
+    persistence.SaveGameStateAsync(gameState).Wait();
     return Results.Ok("Video upload confirmed.");
 });
 
@@ -31,11 +32,12 @@ app.MapPost("/video/loop", (HttpContext ctx) =>
     if (device != "1") return Results.BadRequest("Only device 3 can request loop.");
     if (!gameState.VideoUploaded) return Results.BadRequest("Video not uploaded yet.");
     gameState.LoopStarted = true;
+    persistence.SaveGameStateAsync(gameState).Wait();
     return Results.Ok("Loop started.");
 });
 
 // 2. LLM relay
-app.MapPost("/llm/isupdated", (HttpContext ctx) =>
+app.MapGet("/llm/isupdated", (HttpContext ctx) =>
 {
     var device = GetDeviceId(ctx);
     if (device != "1") return Results.BadRequest("Only device 2 can query LLM.");
@@ -49,6 +51,7 @@ app.MapPost("/llm/password", (HttpContext ctx) =>
     var device = GetDeviceId(ctx);
     if (device != "1") return Results.BadRequest("Only device 1 can set password.");
     gameState.PasswordUpdated = true;
+    persistence.SaveGameStateAsync(gameState).Wait();
     return Results.Ok("Password updated.");
 });
 
@@ -58,7 +61,11 @@ app.MapPost("/disco/lights", (HttpContext ctx) =>
     var device = GetDeviceId(ctx);
     if (device != "1") return Results.BadRequest("Only device 2 can confirm lights.");
     gameState.DiscoState["lights"] = DateTime.UtcNow;
-    gameState.CheckDiscoCompletion(); // Check if disco is now completed
+    var discoCompleted = gameState.CheckDiscoCompletion(); // Check if disco is now completed
+    if (discoCompleted)
+    {
+        persistence.SaveGameStateAsync(gameState).Wait();
+    }
     return Results.Ok("Lights confirmed.");
 });
 
@@ -67,8 +74,20 @@ app.MapPost("/disco/music", (HttpContext ctx) =>
     var device = GetDeviceId(ctx);
     if (device != "1") return Results.BadRequest("Only device 3 can confirm music.");
     gameState.DiscoState["music"] = DateTime.UtcNow;
-    gameState.CheckDiscoCompletion(); // Check if disco is now completed
+    var discoCompleted = gameState.CheckDiscoCompletion(); // Check if disco is now completed
+    if (discoCompleted)
+    {
+        persistence.SaveGameStateAsync(gameState).Wait();
+    }
     return Results.Ok("Music confirmed.");
+});
+
+app.MapGet("/disco/status", () =>
+{
+    return Results.Ok(new
+    {
+        gameState.DiscoCompleted
+    });
 });
 
 // Status endpoint for debugging
