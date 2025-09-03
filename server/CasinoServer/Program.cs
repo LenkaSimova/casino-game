@@ -5,12 +5,11 @@ using System.Runtime.CompilerServices;
 var builder = WebApplication.CreateBuilder(args);
 var app = builder.Build();
 
-var llmPasswordValue = "HelloWorld";
 
 // In-memory state
 var videoUploaded = false;
 var loopStarted = false;
-var llmPassword = string.Empty;
+var passwordUpdated = false;
 var discoState = new ConcurrentDictionary<string, DateTime>();
 var discoWindow = TimeSpan.FromSeconds(5); // 5s window for disco
 var discoCompleted = false;
@@ -56,25 +55,35 @@ app.MapPost("/video/loop", (HttpContext ctx) =>
 });
 
 // 2. LLM relay
-app.MapPost("/llm/query", async (HttpContext ctx) =>
+app.MapPost("/llm/isupdated", (HttpContext ctx) =>
 {
     var device = GetDeviceId(ctx);
     if (device != "1") return Results.BadRequest("Only device 2 can query LLM.");
-    using var reader = new StreamReader(ctx.Request.Body);
-    var prompt = await reader.ReadToEndAsync();
-    if (!string.IsNullOrEmpty(llmPassword))
-        prompt = $"[password:{llmPassword}] {prompt}";
-    // Simulate LLM relay (replace with real call)
-    var llmResponse = $"LLM response to: {prompt}";
-    return Results.Ok(llmResponse);
+    if (!passwordUpdated) return Results.BadRequest("Password not updated yet.");
+    return Results.Ok("Password is updated.");
 });
+
+
+// 2. LLM relay
+// app.MapPost("/llm/query", async (HttpContext ctx) =>
+// {
+//     var device = GetDeviceId(ctx);
+//     if (device != "1") return Results.BadRequest("Only device 2 can query LLM.");
+//     using var reader = new StreamReader(ctx.Request.Body);
+//     var prompt = await reader.ReadToEndAsync();
+//     if (!string.IsNullOrEmpty(llmPassword))
+//         prompt = $"[password:{llmPassword}] {prompt}";
+//     // Simulate LLM relay (replace with real call)
+//     var llmResponse = $"LLM response to: {prompt}";
+//     return Results.Ok(llmResponse);
+// });
 
 app.MapPost("/llm/password", (HttpContext ctx) =>
 {
     var device = GetDeviceId(ctx);
     if (device != "1") return Results.BadRequest("Only device 1 can set password.");
-    llmPassword = llmPasswordValue;
-    return Results.Ok("Password set.");
+    passwordUpdated = true;
+    return Results.Ok("Password updated.");
 });
 
 // 3. Disco endpoints
@@ -101,7 +110,7 @@ app.MapGet("/status", () => new
 {
     videoUploaded,
     loopStarted,
-    llmPasswordSet = !string.IsNullOrEmpty(llmPassword),
+    passwordUpdated,
     discoState,
     discoCompleted
 });

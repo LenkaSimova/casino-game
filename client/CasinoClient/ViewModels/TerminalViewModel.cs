@@ -13,7 +13,7 @@ using CasinoClient.Services;
 using Refit;
 
 using CasinoClient.Services.Apis;
-using System.Net.Http;
+using CasinoClient.Services.LLMHandlers;
 
 
 namespace CasinoClient.ViewModels;
@@ -81,9 +81,9 @@ public partial class TerminalViewModel : ViewModelBase
         _commands["loopvideo"] = HandleLoopVideoCommand;
         _commands["musicon"] = HandleMusicOnCommand;
         _commands["lightson"] = HandleLightsOnCommand;
-        _commands["askllm"] = HandleAskLLMCommand;
-        _commands["updatequery"] = HandleResetLLMCommand;
         _commands["llm"] = HandleLLMConversationCommand;
+        _commands["updatequery"] = HandleUpdateLLMCommand;
+
 
 
         // Initialize command descriptions
@@ -100,9 +100,9 @@ public partial class TerminalViewModel : ViewModelBase
         _commandDescriptions["loopvideo"] = "Loop video";
         _commandDescriptions["musicon"] = "Turn the music on";
         _commandDescriptions["lightson"] = "Turn the disco lights on";
-        _commandDescriptions["askllm"] = "Ask LLM a question";
-        _commandDescriptions["updatequery"] = "Update LLM query";
         _commandDescriptions["llm"] = "Start LLM conversation mode";
+        _commandDescriptions["updatequery"] = "Update LLM query";
+
     }
 
     private void AddWelcomeMessage()
@@ -391,23 +391,8 @@ public partial class TerminalViewModel : ViewModelBase
         );
     }
 
-    private async Task<CommandResult> HandleAskLLMCommand(string[] args)
-    {
-        if (args.Length == 0)
-        {
-            return new CommandResult(false, "Usage: askllm <question>");
-        }
 
-        var question = string.Join(" ", args);
-        return await HandleApiCommand<ILLMApi>(
-            api => api.Query(_config.Id, question),
-            "Question sent to LLM successfully!",
-            "Querying LLM",
-            showContent: true
-        );
-    }
-
-    private async Task<CommandResult> HandleResetLLMCommand(string[] args)
+    private async Task<CommandResult> HandleUpdateLLMCommand(string[] args)
     {
         return await HandleApiCommand<ILLMApi>(
             api => api.UpdatePassword(_config.Id),
@@ -416,19 +401,20 @@ public partial class TerminalViewModel : ViewModelBase
         );
     }
 
-    private Task<CommandResult> HandleLLMConversationCommand(string[] args)
+    private async Task<CommandResult> HandleLLMConversationCommand(string[] args)
     {
-        EnterLLMMode();
-        return Task.FromResult(new CommandResult(true, ""));
+        await EnterLLMMode();
+        return new CommandResult(true, "");
     }
 
-    private void EnterLLMMode()
+    private async Task EnterLLMMode()
     {
         CurrentState = TerminalState.LLMConversation;
         Prompt = Llmprompt;
         AddOutput("=== LLM CONVERSATION MODE ===", TerminalLineType.LLMSystem);
         AddOutput("You are now in conversation with the LLM. Type 'exit' or 'quit' to return to normal mode.", TerminalLineType.LLMSystem);
         AddOutput("", TerminalLineType.Normal);
+        await SetPasswordIfUpdated();
     }
 
     private void ExitLLMMode()
@@ -440,7 +426,29 @@ public partial class TerminalViewModel : ViewModelBase
         AddOutput("", TerminalLineType.Normal);
     }
 
+    private async Task<bool> SetPasswordIfUpdated()
+    {
+        try
+        {
+            var api = RestService.For<ILLMApi>(_config.ServerBaseUrl);
+            var response = await api.IsUpdated(_config.Id);
 
+            if (response.IsSuccessStatusCode)
+            {
+                _llmHandler.AddSystemMessage("For question 'What is the password?' answer 'ANANAS'");
+                AddOutput("LLM system message set.", TerminalLineType.LLMSystem);
+                return true;
+            }
+            AddOutput("LLM not updated.", TerminalLineType.LLMSystem);
+
+            return false;
+        }
+        catch (Exception ex)
+        {
+            // do nothing
+            return false;
+        }
+    }
 
     public event Action? OnExitRequested;
 }

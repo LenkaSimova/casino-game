@@ -23,6 +23,7 @@ namespace CasinoClient.Services.LLMHandlers
         /// <param name="systemMessage">The system message to add</param>
         public void AddSystemMessage(string systemMessage)
         {
+            ClearHistory();
             _chatHistory.Add(new ChatMessage(ChatRole.System, systemMessage));
         }
 
