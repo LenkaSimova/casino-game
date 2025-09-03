@@ -29,6 +29,7 @@ namespace CasinoClient.Services.LLMHandlers
             _geminiApi = RestService.For<IGeminiApi>(baseUrl);
             _model = model;
             AddSystemMessage("Give short answers.");
+            // AddSystemMessage(".");
         }
 
         /// <summary>
@@ -51,6 +52,7 @@ namespace CasinoClient.Services.LLMHandlers
                 return string.Empty;
             var request = new ContentRequest
             {
+                system_instruction = _systemInstruction,
                 contents = new[]
                 {
                     new Content

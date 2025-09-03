@@ -3,7 +3,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 public class ContentRequest
 {
-    public SystemInstruction? systemInstruction { get; set; }
+    public SystemInstruction? system_instruction { get; set; }
     public Content[]? contents { get; set; }
     public GenerationConfig? generationConfig { get; set; }
 }

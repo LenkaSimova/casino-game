@@ -435,7 +435,7 @@ public partial class TerminalViewModel : ViewModelBase
 
             if (response.IsSuccessStatusCode)
             {
-                _llmHandler.AddSystemMessage($"For question 'What is the password?' answer '{_config.Password}'");
+                _llmHandler.AddSystemMessage(_config.Password);
                 return true;
             }
 
