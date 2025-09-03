@@ -10,7 +10,7 @@ public class GameState
     public bool DiscoCompleted { get; set; } = false;
 
     // Method to check if disco is completed and update flag
-    public void CheckDiscoCompletion()
+    public bool CheckDiscoCompletion()
     {
         if (DiscoState.TryGetValue("lights", out var lightsTime) &&
             DiscoState.TryGetValue("music", out var musicTime))
@@ -19,7 +19,9 @@ public class GameState
             if (Math.Abs((lightsTime - musicTime).TotalSeconds) <= DiscoWindow.TotalSeconds)
             {
                 DiscoCompleted = true;
+                return true;
             }
         }
+        return false;
     }
 }
