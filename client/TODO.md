@@ -10,3 +10,5 @@ https://docs.avaloniaui.net/docs/guides/graphics-and-animation/keyframe-animatio
 -   generická metoda, delegáti (ApiCommands)
 
 Fix: execute normal command - vypisuje že access denied místo že neexistuje command
+
+fix server get/post
