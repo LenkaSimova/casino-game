@@ -11,12 +11,23 @@ using System.Diagnostics;
 
 namespace CasinoClient.ViewModels;
 
+/// <summary>
+/// ViewModel for the slot machine game. Handles spinning logic, payouts, and special key combinations.
+/// </summary>
 public partial class SlotMachineViewModel : ViewModelBase
 {
+    /// <summary>
+    /// Random number generator for spinning reels.
+    /// </summary>
     private readonly Random _random = new();
-    // Load bitmap images once at startup
+    /// <summary>
+    /// Bitmap images for each slot symbol, loaded once at startup.
+    /// </summary>
     private readonly Bitmap[] _symbolBitmaps;
 
+    /// <summary>
+    /// Payouts for different symbol combinations. Will be multiplied by the bet amount.
+    /// </summary>
     private readonly Dictionary<string, int> _payouts = new()
     {
         { "diamond_diamond_diamond", 100 },
@@ -31,9 +42,14 @@ public partial class SlotMachineViewModel : ViewModelBase
         { "cherry", 1 }
     };
 
-    // Symbol names for tracking wins
+    /// <summary>
+    /// Symbol names for win checking and key matching.
+    /// </summary>
     private readonly string[] _symbolNames = { "star", "orange", "lemon", "grape", "cherry", "apple", "diamond", "bell" };
 
+    /// <summary>
+    /// Initializes the slot machine, loads bitmaps, and sets initial reel state.
+    /// </summary>
     public SlotMachineViewModel()
     {
         // Load all symbol bitmaps
@@ -47,6 +63,7 @@ public partial class SlotMachineViewModel : ViewModelBase
         _symbolBitmaps[6] = LoadBitmap("diamond.jpg");
         _symbolBitmaps[7] = LoadBitmap("bell.png");
 
+        // Initial reel state is all stars:
         // Set initial reel indices to 0
         _reel1Index = 0;
         _reel2Index = 0;
@@ -57,24 +74,40 @@ public partial class SlotMachineViewModel : ViewModelBase
         _reel3Symbol = _symbolBitmaps[_reel3Index];
     }
 
+    /// <summary>
+    /// Loads a bitmap image from the Assets folder.
+    /// </summary>
     private Bitmap LoadBitmap(string fileName)
     {
         var uri = new Uri($"avares://CasinoClient/Assets/{fileName}");
         return new Bitmap(AssetLoader.Open(uri));
     }
 
+    /// <summary>
+    /// Player's current credits.
+    /// </summary>
     [ObservableProperty]
     private int _credits = 10;
 
+    /// <summary>
+    /// Amount bet per spin.
+    /// </summary>
     [ObservableProperty]
     private int _betAmount = 1;
 
+    /// <summary>
+    /// Bitmap for reel 1's current symbol.
+    /// </summary>
     [ObservableProperty]
     private Bitmap _reel1Symbol;
-
+    /// <summary>
+    /// Bitmap for reel 2's current symbol.
+    /// </summary>
     [ObservableProperty]
     private Bitmap _reel2Symbol;
-
+    /// <summary>
+    /// Bitmap for reel 3's current symbol.
+    /// </summary>
     [ObservableProperty]
     private Bitmap _reel3Symbol;
 
@@ -83,17 +116,32 @@ public partial class SlotMachineViewModel : ViewModelBase
     private int _reel2Index;
     private int _reel3Index;
 
+    /// <summary>
+    /// Amount won in the last spin.
+    /// </summary>
     [ObservableProperty]
     private int _lastWin = 0;
 
+    /// <summary>
+    /// Whether the player can spin (enough credits, not spinning).
+    /// </summary>
     [ObservableProperty]
     private bool _canSpin = true;
 
+    /// <summary>
+    /// Whether the reels are currently spinning.
+    /// </summary>
     [ObservableProperty]
     private bool _isSpinning = false;
 
-    private int _spinSpeed = 50; // milliseconds between symbol changes
+    /// <summary>
+    /// Milliseconds between symbol changes during spin animation.
+    /// </summary>
+    private int _spinSpeed = 50;
 
+    /// <summary>
+    /// Command to spin the slot machine. Only enabled if CanSpin is true.
+    /// </summary>
     [RelayCommand(CanExecute = nameof(CanSpin))]
     private async Task SpinAsync()
     {
@@ -119,6 +167,9 @@ public partial class SlotMachineViewModel : ViewModelBase
         Reel2Symbol = _symbolBitmaps[_reel2Index];
         Reel3Symbol = _symbolBitmaps[_reel3Index];
 
+        // reset key tracking
+        _recentKeys = new char[3];
+
         // Check for wins
         CheckForWins();
 
@@ -127,6 +178,9 @@ public partial class SlotMachineViewModel : ViewModelBase
         CanSpin = Credits >= BetAmount;
     }
 
+    /// <summary>
+    /// Animates the spinning reels by showing random symbols for a set duration.
+    /// </summary>
     private async Task AnimateSpinning()
     {
         int spinDuration = 2000; // Total spin time in milliseconds
@@ -151,6 +205,9 @@ public partial class SlotMachineViewModel : ViewModelBase
         }
     }
 
+    /// <summary>
+    /// Checks the final reel symbols for winning combinations and updates credits and last win.
+    /// </summary>
     private void CheckForWins()
     {
         string symbol1 = _symbolNames[_reel1Index];
@@ -188,6 +245,7 @@ public partial class SlotMachineViewModel : ViewModelBase
         }
     }
 
+    // Update CanSpin and command state when bet, credits, or spinning changes
     partial void OnBetAmountChanged(int value)
     {
         CanSpin = Credits >= value && !IsSpinning;
@@ -206,11 +264,14 @@ public partial class SlotMachineViewModel : ViewModelBase
         SpinCommand.NotifyCanExecuteChanged();
     }
 
-
-    // Watch for special combinations
+    /// <summary>
+    /// Stores the last three keys pressed for special combination detection.
+    /// </summary>
     private char[] _recentKeys = new char[3];
 
-    // Helper to get the first letters of the current visible symbols
+    /// <summary>
+    /// Gets the initials of the current visible symbols on the reels.
+    /// </summary>
     private string GetCurrentSymbolInitials()
     {
         return string.Concat(
@@ -220,6 +281,9 @@ public partial class SlotMachineViewModel : ViewModelBase
         ).ToLower();
     }
 
+    /// <summary>
+    /// Handles key presses and triggers terminal switch if the last three keys match the current symbol initials.
+    /// </summary>
     public void OnKeyPressed(char key)
     {
         if (IsSpinning) return; // Only record after spinning
@@ -240,6 +304,9 @@ public partial class SlotMachineViewModel : ViewModelBase
         }
     }
 
+    /// <summary>
+    /// Event triggered to request switching to the terminal view.
+    /// </summary>
     public event Action? OnTerminalSwitchRequested;
 
 }
