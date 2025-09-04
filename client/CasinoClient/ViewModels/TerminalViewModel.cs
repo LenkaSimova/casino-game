@@ -52,7 +52,7 @@ public partial class TerminalViewModel : ViewModelBase
 
     private TerminalConfig _config = new();
 
-    private ILLMHandler _llmHandler = new GeminiLLMHandler();
+    private ILLMHandler? _llmHandler;
 
     public TerminalViewModel()
     {
@@ -65,6 +65,14 @@ public partial class TerminalViewModel : ViewModelBase
     {
         _config = ConfigurationService.LoadConfig();
         Prompt = _config.Prompt;
+        if (_config.LLMHandler.Equals("gemini", StringComparison.OrdinalIgnoreCase))
+        {
+            _llmHandler = new GeminiLLMHandler(_config.LLMBaseUrl, _config.LLMModel);
+        }
+        else
+        {
+            _llmHandler = new LocalLLMHandler(_config.LLMBaseUrl, _config.LLMModel);
+        }
     }
 
     private void InitializeCommands()
@@ -200,6 +208,12 @@ public partial class TerminalViewModel : ViewModelBase
         try
         {
             AddOutput("Thinking...", TerminalLineType.LLMSystem);
+
+            if (_llmHandler == null)
+            {
+                AddOutput("LLM handler is not initialized.", TerminalLineType.Error);
+                return;
+            }
 
             var result = await _llmHandler.SendMessageAsync(input);
 
@@ -408,6 +422,12 @@ public partial class TerminalViewModel : ViewModelBase
 
     private async Task EnterLLMMode()
     {
+        if (_llmHandler == null)
+        {
+            AddOutput("LLM handler is not initialized.", TerminalLineType.Error);
+            return;
+        }
+
         CurrentState = TerminalState.LLMConversation;
         Prompt = Llmprompt;
         AddOutput("=== LLM CONVERSATION MODE ===", TerminalLineType.LLMSystem);
@@ -435,7 +455,7 @@ public partial class TerminalViewModel : ViewModelBase
 
             if (response.IsSuccessStatusCode)
             {
-                _llmHandler.AddSystemMessage(_config.Password);
+                _llmHandler!.AddSystemMessage(_config.Password);
                 return true;
             }
 
