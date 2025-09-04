@@ -11,6 +11,9 @@ public partial class TerminalView : UserControl
     private TextBox? _commandInput;
     private ScrollViewer? _terminalScroller;
 
+    /// <summary>
+    /// Initializes the view and sets up event handlers.
+    /// </summary>
     public TerminalView()
     {
         InitializeComponent();
@@ -19,6 +22,9 @@ public partial class TerminalView : UserControl
         Focusable = true;
     }
 
+    /// <summary>
+    /// Called when the view is loaded; finds controls and sets up auto-scroll and focus.
+    /// </summary>
     private void OnLoaded(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
         // Find controls
@@ -42,6 +48,9 @@ public partial class TerminalView : UserControl
         }
     }
 
+    /// <summary>
+    /// Handles key events for command input and history navigation.
+    /// </summary>
     private void OnKeyDown(object? sender, KeyEventArgs e)
     {
         if (DataContext is not TerminalViewModel viewModel) return;
@@ -63,11 +72,17 @@ public partial class TerminalView : UserControl
         }
     }
 
+    /// <summary>
+    /// Scrolls the terminal output to the bottom.
+    /// </summary>
     private void ScrollToBottom()
     {
         _terminalScroller?.ScrollToEnd();
     }
 
+    /// <summary>
+    /// Ensures the command input stays focused when the view is clicked.
+    /// </summary>
     protected override void OnPointerPressed(PointerPressedEventArgs e)
     {
         // Keep focus on the command input
