@@ -1,0 +1,18 @@
+{
+    "Id": 2,
+    "Name": "Casino Terminal",
+    "AllowedCommands": [
+        "help",
+        "clear",
+        "echo",
+        "status",
+        "camera",
+        "security",
+        "vault",
+        "exit",
+        "llm",
+        "lightson"
+    ],
+    "Prompt": "casino@terminal-2:~$ ",
+    "ServerBaseUrl": "http://localhost:5122"
+}
