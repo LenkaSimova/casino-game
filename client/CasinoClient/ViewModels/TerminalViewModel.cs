@@ -82,7 +82,7 @@ public partial class TerminalViewModel : ViewModelBase
         _commands["musicon"] = HandleMusicOnCommand;
         _commands["lightson"] = HandleLightsOnCommand;
         _commands["llm"] = HandleLLMConversationCommand;
-        _commands["updatequery"] = HandleUpdateLLMCommand;
+        _commands["updateprompt"] = HandleUpdateLLMCommand;
 
 
 
@@ -101,7 +101,7 @@ public partial class TerminalViewModel : ViewModelBase
         _commandDescriptions["musicon"] = "Turn the music on";
         _commandDescriptions["lightson"] = "Turn the disco lights on";
         _commandDescriptions["llm"] = "Start LLM conversation mode";
-        _commandDescriptions["updatequery"] = "Update LLM query";
+        _commandDescriptions["updateprompt"] = "Update LLM prompt";
 
     }
 
