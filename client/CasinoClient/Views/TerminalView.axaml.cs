@@ -27,7 +27,7 @@ public partial class TerminalView : UserControl
     /// </summary>
     private void OnLoaded(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        // Find controls
+        // Find controls (input field and terminal output)
         _commandInput = this.FindControl<TextBox>("CommandInput");
         _terminalScroller = this.FindControl<ScrollViewer>("TerminalScroller");
 
