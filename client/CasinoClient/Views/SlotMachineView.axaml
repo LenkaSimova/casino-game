@@ -104,7 +104,8 @@
                Margin="0,0,20,0"
                Maximum="10"
                Minimum="1"
-               Value="{Binding BetAmount}" />
+               Value="{Binding BetAmount}"
+               IsTabStop="False" />
 
       <Button Name="SpinButton"
           Padding="20,10"
@@ -113,7 +114,8 @@
           Content="SPIN"
           FontSize="24"
           FontWeight="Bold"
-          IsEnabled="{Binding CanSpin}">
+          IsEnabled="{Binding CanSpin}"
+          IsTabStop="False">
 
         <Button.Styles>
           <Style Selector="Button">
