@@ -14,6 +14,7 @@ using Refit;
 
 using CasinoClient.Services.Apis;
 using CasinoClient.Services.LLMHandlers;
+using CasinoClient.Services;
 
 
 namespace CasinoClient.ViewModels;
@@ -370,6 +371,19 @@ public partial class TerminalViewModel : ViewModelBase
 
     private async Task<CommandResult> HandleUploadVideoCommand(string[] args)
     {
+        var result = SdCardvideoDetector.GetSdCardState();
+        switch (result)
+        {
+            case SdCardState.NoSdCardDetected:
+                return new CommandResult(false, "No SD card detected. Please insert an SD.");
+
+            case SdCardState.SdCardDetectedNoVideo:
+                return new CommandResult(false, "SD card detected but no video files found. Please add a video file to the SD card.");
+
+            case SdCardState.SdCardWithVideoPresent:
+                // Proceed with upload
+                break;
+        }
         return await HandleApiCommand<IVideoApi>(
             api => api.UploadVideo(_config.Id),
             "Video upload successful!",
