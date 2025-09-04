@@ -2,6 +2,9 @@ using System.Collections.Generic;
 
 namespace CasinoClient.Models;
 
+/// <summary>
+/// Configuration settings for a terminal instance.
+/// </summary>
 public class TerminalConfig
 {
     public int Id { get; set; }

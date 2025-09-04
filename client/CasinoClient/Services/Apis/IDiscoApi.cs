@@ -3,6 +3,9 @@ using System.Threading.Tasks;
 
 namespace CasinoClient.Services.Apis;
 
+/// <summary>
+/// API interface for controlling disco features.
+/// </summary>
 public interface IDiscoApi
 {
     [Post("/disco/music")]
