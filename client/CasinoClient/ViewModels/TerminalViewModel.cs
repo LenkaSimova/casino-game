@@ -423,8 +423,8 @@ public partial class TerminalViewModel : ViewModelBase
     {
         return await HandleApiCommand<ILLMApi>(
             api => api.UpdatePassword(_config.Id),
-            "LLM query updated successfully!",
-            "Updating LLM query"
+            "LLM prompt updated successfully!",
+            "Updating LLM prompt"
         );
     }
 
@@ -472,7 +472,6 @@ public partial class TerminalViewModel : ViewModelBase
                 _llmHandler!.AddSystemMessage(_config.Password);
                 return true;
             }
-
             return false;
         }
         catch (Exception)
