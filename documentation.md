@@ -1,4 +1,4 @@
-# Hra Útěk z casina - Programátorská dokumentace
+# Hra Útěk z casina - Dokumentace
 
 ## Architektura
 
