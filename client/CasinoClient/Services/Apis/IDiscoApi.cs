@@ -13,4 +13,7 @@ public interface IDiscoApi
 
     [Post("/disco/lights")]
     Task<ApiResponse<string>> LightsOn([AliasAs("device")] int device);
+
+    [Get("/disco/status")]
+    Task<ApiResponse<int>> DiscoStatus([AliasAs("device")] int device);
 }
