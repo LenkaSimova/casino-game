@@ -289,7 +289,3 @@ dotnet publish -c Release
 # Klient
 dotnet publish -c Release
 ```
-
-### Kontrola stavu hry
-
--   Stav hry lze zkontrolovat na `/status` endpointu
