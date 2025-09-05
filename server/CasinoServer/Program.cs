@@ -66,7 +66,7 @@ app.MapPost("/disco/lights", (HttpContext ctx) =>
     {
         persistence.SaveGameStateAsync(gameState).Wait();
     }
-    return Results.Ok("Lights confirmed.");
+    return Results.Ok((int)gameState.DiscoWindow.TotalSeconds);
 });
 
 app.MapPost("/disco/music", (HttpContext ctx) =>
@@ -79,7 +79,7 @@ app.MapPost("/disco/music", (HttpContext ctx) =>
     {
         persistence.SaveGameStateAsync(gameState).Wait();
     }
-    return Results.Ok("Music confirmed.");
+    return Results.Ok((int)gameState.DiscoWindow.TotalSeconds);
 });
 
 app.MapGet("/disco/status", () =>
