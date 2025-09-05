@@ -133,8 +133,7 @@ public string CurrentInput { get; set; }
 public TerminalState CurrentState { get; set; }
 
 // Metody pro příkazy
-private async Task<CommandResult> HandleHelpCommand(string[] args)
-private async Task<CommandResult> HandleApiCommand<T>(...)
+private async Task ExecuteCommand()
 ```
 
 #### Views
@@ -151,7 +150,7 @@ private async Task<CommandResult> HandleApiCommand<T>(...)
 -   **Styly**: Různé barvy pro různé typy zpráv
 -   **Auto-scroll**: Automatické posouvání na konec při nových zprávách
 
-### Služby
+### Services
 
 #### `ConfigurationService`
 
@@ -219,7 +218,10 @@ public interface IVideoApi
     "AllowedCommands": ["help", "uploadvideo"], // Povolené příkazy
     "Prompt": "casino@terminal-1:~$ ", // Prompt
     "ServerBaseUrl": "http://localhost:5122", // URL serveru
-    "Password": "System message for LLM..." // Systémová zpráva pro LLM
+    "Password": "System message for LLM...", // Systémová zpráva pro LLM
+    "LLMHandler": "local", // výběr lokálního llm s Ollama, "gemini" pro Google Gemini
+    "LLMBaseUrl": "http://localhost:11434/",
+    "LLMModel": "gemma3:270m"
 }
 ```
 
@@ -248,9 +250,10 @@ Server automaticky ukládá stav do `gamestate.json`:
 
 1. **Server**: Přidat endpoint do `Program.cs`
 2. **Klient**:
-    - Přidat metodu do `TerminalViewModel`
-    - Zaregistrovat v `InitializeCommands()`
-    - Přidat do `AllowedCommands` v konfiguraci
+    - Nový termianl command:
+        - Přidat metodu do `TerminalViewModel`
+        - Zaregistrovat v `InitializeCommands()`
+        - Přidat do `AllowedCommands` v konfiguraci
 
 ### Přidání nového API
 
@@ -287,38 +290,6 @@ dotnet publish -c Release
 dotnet publish -c Release
 ```
 
-## Testování
+### Kontrola stavu hry
 
-### Manuální testování API
-
-```bash
-# Test video upload
-curl -X POST "http://localhost:5122/video/upload?device=1"
-
-# Test disco coordination
-curl -X POST "http://localhost:5122/disco/lights?device=2" &
-curl -X POST "http://localhost:5122/disco/music?device=3"
-```
-
-### Debugging
-
--   Server loguje do konzole
--   Klient má Avalonia DevTools v Debug módu
 -   Stav hry lze zkontrolovat na `/status` endpointu
-
-## Známé limitace
-
-1. **Synchronizace**: Disco timing závisí na přesnosti systémových hodin
-2. **Persistence**: Pouze manuální ukládání stavu
-3. **Bezpečnost**: Žádná autentizace API endpointů
-4. **Error handling**: Minimální zpracování chyb v klientu
-5. **UI responsiveness**: LLM volání blokují UI
-
-## Možná vylepšení
-
-1. **Real-time updates**: SignalR pro živé aktualizace stavu
-2. **Autentizace**: Token-based authentication
-3. **Async UI**: Non-blocking LLM komunikace
-4. **Auto-persistence**: Automatické ukládání při změnách
-5. **Monitoring**: Logging a metriky
-6. **Testing**: Unit a integration testy
