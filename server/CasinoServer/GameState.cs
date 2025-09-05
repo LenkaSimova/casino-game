@@ -12,6 +12,7 @@ public class GameState
     // Method to check if disco is completed and update flag
     public bool CheckDiscoCompletion()
     {
+        if (DiscoCompleted) return true; // Already completed
         if (DiscoState.TryGetValue("lights", out var lightsTime) &&
             DiscoState.TryGetValue("music", out var musicTime))
         {
