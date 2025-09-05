@@ -29,7 +29,7 @@ app.MapPost("/video/upload", (HttpContext ctx) =>
 app.MapPost("/video/loop", (HttpContext ctx) =>
 {
     var device = GetDeviceId(ctx);
-    if (device != "1") return Results.BadRequest("Only device 3 can request loop.");
+    if (device != "3") return Results.BadRequest("Only device 3 can request loop.");
     if (!gameState.VideoUploaded) return Results.BadRequest("Video not uploaded yet.");
     gameState.LoopStarted = true;
     persistence.SaveGameStateAsync(gameState).Wait();
@@ -40,7 +40,7 @@ app.MapPost("/video/loop", (HttpContext ctx) =>
 app.MapGet("/llm/isupdated", (HttpContext ctx) =>
 {
     var device = GetDeviceId(ctx);
-    if (device != "1") return Results.BadRequest("Only device 2 can query LLM.");
+    if (device != "2") return Results.BadRequest("Only device 2 can query LLM.");
     if (!gameState.PasswordUpdated) return Results.BadRequest("Password not updated yet.");
     return Results.Ok("Password is updated.");
 });
@@ -59,7 +59,7 @@ app.MapPost("/llm/password", (HttpContext ctx) =>
 app.MapPost("/disco/lights", (HttpContext ctx) =>
 {
     var device = GetDeviceId(ctx);
-    if (device != "1") return Results.BadRequest("Only device 2 can confirm lights.");
+    if (device != "2") return Results.BadRequest("Only device 2 can confirm lights.");
     gameState.DiscoState["lights"] = DateTime.UtcNow;
     var discoCompleted = gameState.CheckDiscoCompletion(); // Check if disco is now completed
     if (discoCompleted)
@@ -72,7 +72,7 @@ app.MapPost("/disco/lights", (HttpContext ctx) =>
 app.MapPost("/disco/music", (HttpContext ctx) =>
 {
     var device = GetDeviceId(ctx);
-    if (device != "1") return Results.BadRequest("Only device 3 can confirm music.");
+    if (device != "3") return Results.BadRequest("Only device 3 can confirm music.");
     gameState.DiscoState["music"] = DateTime.UtcNow;
     var discoCompleted = gameState.CheckDiscoCompletion(); // Check if disco is now completed
     if (discoCompleted)
@@ -125,3 +125,6 @@ app.MapDelete("/admin/savedstate", () =>
 });
 
 app.Run();
+
+// Make Program class accessible for testing
+public partial class Program { }
