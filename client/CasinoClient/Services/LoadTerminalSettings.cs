@@ -11,13 +11,13 @@ public class ConfigurationService
 {
     private const string CONFIG_FILE = "terminal_config.json";
 
-    public static TerminalConfig LoadConfig()
+    public static TerminalConfig LoadConfig(string filePath = CONFIG_FILE)
     {
         try
         {
-            if (File.Exists(CONFIG_FILE))
+            if (File.Exists(filePath))
             {
-                var json = File.ReadAllText(CONFIG_FILE);
+                var json = File.ReadAllText(filePath);
                 var config = JsonSerializer.Deserialize<TerminalConfig>(json);
                 return config ?? GetDefaultConfig();
             }
