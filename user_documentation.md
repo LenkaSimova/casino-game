@@ -101,8 +101,10 @@ Po úspěšném zadání kódu se zobrazí terminálové rozhraní.
 
 ### 1. Nahrání videa
 
-1. Zařízení 1 musí potvrdit nahrání videa (`uploadvideo`)
-2. Teprve poté může zařízení 3 spustit smyčku (`loopvideo`)
+1. Pro nahrání videa je nutné mít připojenou SD kartu s názvem "SDCARD"
+2. Systém automaticky detekuje přítomnost video souborů na SD kartě (podporované formáty: .mp4, .mov, .avi, .mkv, .wmv, .flv, .mpeg, .mpg)
+3. Zařízení 1 musí potvrdit nahrání videa (`uploadvideo`) - příkaz bude úspěšný pouze pokud je detekováno video na SD kartě
+4. Teprve poté může zařízení 3 spustit smyčku (`loopvideo`)
 
 ### 2. LLM komunikace
 
@@ -150,7 +152,31 @@ ollama pull gemma3:270m
 ### Terminál nezobrazuje některé příkazy
 
 -   Zkontrolujte pole `AllowedCommands` v konfiguraci terminálu
--   Různé terminály mají různá oprávnění podle ID
+-   Různé terminály mají různá oprávnění podle ID zařízení
+-   Server kontroluje oprávnění pro každý příkaz podle konfigurace
+
+### Oprávnění terminálů
+
+Každý terminál (zařízení) má přístup pouze k určitým příkazům. Toto je dáno konfigurací na serveru:
+
+| Zařízení | Dostupné příkazy                   |
+| -------- | ---------------------------------- |
+| 1        | uploadvideo, updateprompt          |
+| 2        | lightson, llm (pro zjištění hesla) |
+| 3        | loopvideo, musicon                 |
+
+### SD karta a video
+
+-   Ujistěte se, že SD karta je pojmenována přesně jako "SDCARD"
+-   Podporované video formáty:
+    -   .mp4, .mov, .avi
+    -   .mkv, .wmv, .flv
+    -   .mpeg, .mpg
+-   Video může být v libovolné složce na SD kartě
+-   Pokud video není detekováno, zkontrolujte:
+    1. Název SD karty
+    2. Formát video souboru
+    3. Přístupová práva k SD kartě
 
 ## Závěrem
 

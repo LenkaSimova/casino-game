@@ -65,23 +65,42 @@ Zajišťuje ukládání a načítání stavu do/ze souboru `gamestate.json`.
 
 ### API Endpointy
 
-| Endpoint            | Metoda | Zařízení | Popis                                    |
-| ------------------- | ------ | -------- | ---------------------------------------- |
-| `/video/upload`     | POST   | 1        | Potvrzení nahrání videa                  |
-| `/video/loop`       | POST   | 3        | Spuštění smyčky (vyžaduje nahrané video) |
-| `/llm/password`     | POST   | 1        | Nastavení hesla pro LLM                  |
-| `/llm/isupdated`    | GET    | 2        | Kontrola, zda je heslo nastaveno         |
-| `/disco/lights`     | POST   | 2        | Zapnutí světel                           |
-| `/disco/music`      | POST   | 3        | Zapnutí hudby                            |
-| `/disco/status`     | GET    | -        | Stav disco úkolu                         |
-| `/status`           | GET    | -        | Celkový stav hry                         |
-| `/admin/reset`      | POST   | -        | Reset stavu hry                          |
-| `/admin/save`       | POST   | -        | Manuální uložení                         |
-| `/admin/savedstate` | DELETE | -        | Smazání uloženého stavu                  |
+| Endpoint            | Metoda | Zařízení (configurable) | Popis                                    |
+| ------------------- | ------ | ----------------------- | ---------------------------------------- |
+| `/video/upload`     | POST   | 1                       | Potvrzení nahrání videa                  |
+| `/video/loop`       | POST   | 3                       | Spuštění smyčky (vyžaduje nahrané video) |
+| `/llm/password`     | POST   | 1                       | Nastavení hesla pro LLM                  |
+| `/llm/isupdated`    | GET    | 2                       | Kontrola, zda je heslo nastaveno         |
+| `/disco/lights`     | POST   | 2                       | Zapnutí světel                           |
+| `/disco/music`      | POST   | 3                       | Zapnutí hudby                            |
+| `/disco/status`     | GET    | -                       | Stav disco úkolu                         |
+| `/status`           | GET    | -                       | Celkový stav hry                         |
+| `/admin/reset`      | POST   | -                       | Reset stavu hry                          |
+| `/admin/save`       | POST   | -                       | Manuální uložení                         |
+| `/admin/savedstate` | DELETE | -                       | Smazání uloženého stavu                  |
 
-### Identifikace zařízení
+### Identifikace zařízení a oprávnění
 
-Každý request musí obsahovat query parametr `device` s ID zařízení (1, 2, nebo 3).
+Každý request musí obsahovat query parametr `device` s ID zařízení (1, 2, nebo 3). Server používá systém oprávnění založený na konfiguraci v souboru `device_permissions.json`, který definuje, která zařízení mají přístup k jakým endpointům:
+
+```json
+{
+    "DevicePermissions": {
+        "/video/upload": ["1"],
+        "/video/loop": ["3"],
+        "/llm/isupdated": ["2"],
+        "/llm/password": ["1"],
+        "/disco/lights": ["2"],
+        "/disco/music": ["3"]
+    }
+}
+```
+
+Oprávnění se načítají při startu serveru pomocí `DevicePermissionsLoader`, který podporuje:
+
+-   Dynamickou konfiguraci oprávnění bez nutnosti restartu
+-   Fallback na prázdná oprávnění v případě chyby
+-   Možnost definovat různá oprávnění pro různá prostředí (development/production)
 
 ## Struktura klienta
 
@@ -150,6 +169,10 @@ private async Task ExecuteCommand()
 -   **Styly**: Různé barvy pro různé typy zpráv
 -   **Auto-scroll**: Automatické posouvání na konec při nových zprávách
 
+##### `MainView`
+
+-   umožňuje přechody mezi SlotMachine a Terminálem
+
 ### Services
 
 #### `ConfigurationService`
@@ -157,7 +180,7 @@ private async Task ExecuteCommand()
 Načítání konfigurace z `terminal_config.json`:
 
 ```csharp
-public static TerminalConfig LoadConfig()
+public static TerminalConfig LoadConfig(string path = "terminal_config.json")
 {
     // Načte konfiguraci nebo vrátí výchozí
 }
@@ -206,6 +229,25 @@ public interface IVideoApi
     Task<ApiResponse<string>> UploadVideo([AliasAs("device")] int device);
 }
 ```
+
+#### SD Card Video Detection
+
+Klient obsahuje službu `SDCardVideoDetector`, která poskytuje následující funkcionalitu:
+
+```csharp
+public enum SdCardState
+{
+    NoSdCardDetected,
+    SdCardDetectedNoVideo,
+    SdCardWithVideoPresent
+}
+```
+
+Detektor provádí:
+
+-   Detekci připojených SD karet (hledá jednotky s názvem "SDCARD")
+-   Kontrolu přítomnosti video souborů (podporované formáty: .mp4, .mov, .avi, .mkv, .wmv, .flv, .mpeg, .mpg)
+-   Rekurzivní prohledávání všech adresářů na SD kartě
 
 ## Konfigurace
 
@@ -265,27 +307,3 @@ Server automaticky ukládá stav do `gamestate.json`:
 
 1. Implementovat `ILLMHandler`
 2. Zaregistrovat v `TerminalViewModel`
-
-## Buildování a nasazení
-
-### Development
-
-```bash
-# Server
-cd server/CasinoServer
-dotnet run
-
-# Klient
-cd client/CasinoClient
-dotnet run
-```
-
-### Production
-
-```bash
-# Server
-dotnet publish -c Release
-
-# Klient
-dotnet publish -c Release
-```
