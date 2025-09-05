@@ -2,7 +2,7 @@
 
 ## Přehled
 
-"Útěk z casina" je aplikace navržená jako součást větší únikové táborové hry. Hra se skládá ze tří částí:
+"Útěk z casina" je aplikace navržená jako součást větší únikové táborové hry. Hra se skládá ze dvou částí:
 
 -   **Klientská aplikace** - běží na počítačích dostupných hráčům
 -   **Centrální server** - koordinuje stav hry mezi všemi klienty
@@ -12,7 +12,7 @@
 ### Požadavky
 
 -   .NET 8.0
--   Pro LLM funkčnost: Ollama (volitelné)
+-   Pro lokální LLM funkčnost: Ollama (volitelné)
 
 ### Spuštění serveru
 
@@ -40,7 +40,11 @@ Každý klient lze nakonfigurovat úpravou souboru `terminal_config.json`:
     "Name": "Terminal-1",
     "AllowedCommands": ["help", "uploadvideo", "loopvideo", "llm"],
     "Prompt": "casino@terminal-1:~$ ",
-    "ServerBaseUrl": "http://localhost:5122"
+    "ServerBaseUrl": "http://localhost:5122",
+    "Password": "ANANAS",
+    "LLMHandler": "local",
+    "LLMBaseUrl": "http://localhost:11434/",
+    "LLMModel": "gemma3:270m"
 }
 ```
 
@@ -93,7 +97,7 @@ Po úspěšném zadání kódu se zobrazí terminálové rozhraní.
 -   Konverzace s AI asistentem
 -   Ukončení: `exit` nebo `quit`
 
-## Herní mechanismy
+## Herní cíle
 
 ### 1. Nahrání videa
 
@@ -114,7 +118,17 @@ Po úspěšném zadání kódu se zobrazí terminálové rozhraní.
 
 ## LLM
 
-TODO
+LLMHandler:
+**local** – vyžaduje instalaci [Ollama](https://ollama.com)
+
+```bash
+ollama serve
+ollama pull gemma3:270m
+```
+
+**gemini** – využívá Google Gemini
+
+-   vyžaduje nastavení evnironment variable GEMINI_API_KEY
 
 ## Řešení problémů
 
@@ -138,9 +152,6 @@ TODO
 -   Zkontrolujte pole `AllowedCommands` v konfiguraci terminálu
 -   Různé terminály mají různá oprávnění podle ID
 
-## Tipy pro hráče
+## Závěrem
 
-1. **Pozorně sledujte symboly** na herním automatu - jsou klíčem k přechodu na terminál
-2. **Koordinujte se s ostatními hráči** - mnoho úkolů vyžaduje spolupráci
-3. **Experimentujte s příkazy** - některé příkazy jsou skryté a objevíte je během hry
-4. **Využijte LLM** - AI asistent vám může pomoci s řešením hádanek (pokud má správné heslo)
+-   hra není únikovou místností sama o sobě, vyžaduje další herní prvky pro smysluplnost a zážitek ze hry :)
