@@ -25,6 +25,9 @@ public partial class SlotMachineViewModel : ViewModelBase
     /// </summary>
     private readonly Bitmap[] _symbolBitmaps;
 
+
+    public const int SpinDuration = 2000; // Total spin time in milliseconds
+
     /// <summary>
     /// Payouts for different symbol combinations. Will be multiplied by the bet amount.
     /// </summary>
@@ -183,7 +186,7 @@ public partial class SlotMachineViewModel : ViewModelBase
     /// </summary>
     private async Task AnimateSpinning()
     {
-        int spinDuration = 2000; // Total spin time in milliseconds
+        int spinDuration = SpinDuration; // Total spin time in milliseconds
         int elapsed = 0;
         int currentSpinSpeed = _spinSpeed;
 
