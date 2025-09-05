@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CasinoClient", "CasinoClient\CasinoClient.csproj", "{CBFA5AFE-A31E-4A97-90B8-9FCF94FB02F0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CasinoClient.Tests", "CasinoClient.Tests\CasinoClient.Tests.csproj", "{5A6B3A44-D559-462A-A5A9-B121D8AD3690}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{CBFA5AFE-A31E-4A97-90B8-9FCF94FB02F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CBFA5AFE-A31E-4A97-90B8-9FCF94FB02F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CBFA5AFE-A31E-4A97-90B8-9FCF94FB02F0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5A6B3A44-D559-462A-A5A9-B121D8AD3690}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A6B3A44-D559-462A-A5A9-B121D8AD3690}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5A6B3A44-D559-462A-A5A9-B121D8AD3690}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5A6B3A44-D559-462A-A5A9-B121D8AD3690}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
