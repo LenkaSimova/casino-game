@@ -403,4 +403,4 @@ FodyWeavers.xsd
 
 terminal_config.json
 gamestate.json
-
+device_*
