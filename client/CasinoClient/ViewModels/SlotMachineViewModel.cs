@@ -5,6 +5,8 @@ using CommunityToolkit.Mvvm.Input;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using System.Threading.Tasks;
+using CasinoClient.Models;
+using CasinoClient.Services;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 
@@ -16,6 +18,8 @@ namespace CasinoClient.ViewModels;
 /// </summary>
 public partial class SlotMachineViewModel : ViewModelBase
 {
+    private TerminalConfig _config = new();
+
     /// <summary>
     /// Random number generator for spinning reels.
     /// </summary>
@@ -27,6 +31,13 @@ public partial class SlotMachineViewModel : ViewModelBase
 
 
     public const int SpinDuration = 2000; // Total spin time in milliseconds
+
+    private string _password = "";
+
+    /// <summary>
+    /// Stores the last three keys pressed for special combination detection.
+    /// </summary>
+    private char[] _recentKeys = null;
 
     /// <summary>
     /// Payouts for different symbol combinations. Will be multiplied by the bet amount.
@@ -75,6 +86,15 @@ public partial class SlotMachineViewModel : ViewModelBase
         _reel1Symbol = _symbolBitmaps[_reel1Index];
         _reel2Symbol = _symbolBitmaps[_reel2Index];
         _reel3Symbol = _symbolBitmaps[_reel3Index];
+
+        LoadConfiguration();
+        _recentKeys = new char[_password.Length];
+    }
+
+    private void LoadConfiguration()
+    {
+        _config = ConfigurationService.LoadConfig();
+        _password = _config.TerminalPassword;
     }
 
     /// <summary>
@@ -90,7 +110,7 @@ public partial class SlotMachineViewModel : ViewModelBase
     /// Player's current credits.
     /// </summary>
     [ObservableProperty]
-    private int _credits = 10;
+    private int _credits = 1000;
 
     /// <summary>
     /// Amount bet per spin.
@@ -171,7 +191,7 @@ public partial class SlotMachineViewModel : ViewModelBase
         Reel3Symbol = _symbolBitmaps[_reel3Index];
 
         // reset key tracking
-        _recentKeys = new char[3];
+        _recentKeys = new char[_password.Length];
 
         // Check for wins
         CheckForWins();
@@ -267,10 +287,9 @@ public partial class SlotMachineViewModel : ViewModelBase
         SpinCommand.NotifyCanExecuteChanged();
     }
 
-    /// <summary>
-    /// Stores the last three keys pressed for special combination detection.
-    /// </summary>
-    private char[] _recentKeys = new char[3];
+
+
+
 
     /// <summary>
     /// Gets the initials of the current visible symbols on the reels.
@@ -292,15 +311,14 @@ public partial class SlotMachineViewModel : ViewModelBase
         if (IsSpinning) return; // Only record after spinning
 
         // Keep only last 3 keys
-        if (_recentKeys.Length == 3)
-            Array.Copy(_recentKeys, 1, _recentKeys, 0, 2);
-        _recentKeys[2] = char.ToLower(key);
+        if (_recentKeys.Length == _password.Length)
+            Array.Copy(_recentKeys, 1, _recentKeys, 0, _recentKeys.Length - 1);
+        _recentKeys[_recentKeys.Length - 1] = char.ToLower(key);
 
         // Check for match
-        var initials = GetCurrentSymbolInitials();
         var pressed = new string(_recentKeys);
 
-        if (pressed.Equals(initials, StringComparison.Ordinal))
+        if (pressed.Equals(_password, StringComparison.Ordinal))
         {
             // Trigger terminal view switch
             OnTerminalSwitchRequested?.Invoke();

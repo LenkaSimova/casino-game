@@ -56,6 +56,14 @@
       <Setter Property="BorderThickness" Value="0"/>
       <Setter Property="Padding" Value="0"/>
       <Setter Property="CaretBrush" Value="#F0F0F0"/>
+      <Setter Property="SelectionBrush" Value="#3A3A3A"/>
+      <Setter Property="SelectionForegroundBrush" Value="#F0F0F0"/>
+    </Style>
+    
+    <!-- Override TextBox template for Windows compatibility -->
+    <Style Selector="TextBox.terminal-input /template/ Border#PART_BorderElement">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
     </Style>
   </UserControl.Styles>
 

@@ -40,9 +40,23 @@ public partial class MainWindowViewModel : ViewModelBase
         // Create TerminalViewModel and subscribe to its event for returning to SlotMachine view
         var terminalViewModel = new TerminalViewModel();
         terminalViewModel.OnExitRequested += ShowSlotMachine;
+        terminalViewModel.OnAppExitRequested += ExitApplication;
 
         CurrentViewModel = terminalViewModel;
     }
+
+    /// <summary>
+    /// Exits the application (used by hidden orgexit command)
+    /// </summary>
+    private void ExitApplication()
+    {
+        OnAppExitRequested?.Invoke();
+    }
+
+    /// <summary>
+    /// Event to notify the app to exit completely
+    /// </summary>
+    public event System.Action? OnAppExitRequested;
 
     /// <summary>
     /// Command to switch back to the SlotMachine view.

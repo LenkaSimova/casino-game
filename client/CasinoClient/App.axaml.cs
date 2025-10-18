@@ -23,10 +23,26 @@ public partial class App : Application
             // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
             // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
             DisableAvaloniaDataAnnotationValidation();
-            desktop.MainWindow = new MainWindow
+
+            var mainWindowViewModel = new MainWindowViewModel();
+            var mainWindow = new MainWindow
             {
-                DataContext = new MainWindowViewModel(),
+                DataContext = mainWindowViewModel,
             };
+
+            // Subscribe to app exit event from the ViewModel
+            mainWindowViewModel.OnAppExitRequested += () =>
+            {
+                // Allow the window to close
+                mainWindow.AllowClose();
+                // Shutdown the application
+                desktop.Shutdown();
+            };
+
+            desktop.MainWindow = mainWindow;
+
+            // Prevent application shutdown when main window closes
+            desktop.ShutdownMode = Avalonia.Controls.ShutdownMode.OnExplicitShutdown;
         }
 
         base.OnFrameworkInitializationCompleted();

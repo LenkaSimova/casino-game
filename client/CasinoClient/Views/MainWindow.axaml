@@ -10,7 +10,13 @@
         d:DesignWidth="400"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        mc:Ignorable="d">
+        mc:Ignorable="d"
+        WindowState="FullScreen"
+        SystemDecorations="None"
+        Topmost="True"
+        CanResize="False"
+        ShowInTaskbar="False"
+        ExtendClientAreaToDecorationsHint="True">
 
     <Design.DataContext>
         <!--
