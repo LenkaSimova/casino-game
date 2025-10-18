@@ -25,7 +25,7 @@ public static class SdCardvideoDetector
         foreach (var drive in DriveInfo.GetDrives())
         {
             // Only consider removable drives that are ready and named SDCARD
-            if (drive.IsReady && drive.Name.ToUpper().Contains("SDCARD"))
+            if (drive.IsReady && (drive.Name.ToUpper().Contains("SDCARD") || (drive.VolumeLabel != null && drive.VolumeLabel.ToUpper().Contains("SDCARD"))))
             {
                 sdCardFound = true;
                 try
