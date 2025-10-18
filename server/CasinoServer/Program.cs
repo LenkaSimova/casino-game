@@ -1,7 +1,37 @@
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure logging
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.SetMinimumLevel(LogLevel.Information);
+
 var app = builder.Build();
 
+// Add request logging middleware
+app.Use(async (context, next) =>
+{
+    var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+    var deviceId = context.Request.Query.TryGetValue("device", out var device) ? device.ToString() : "none";
+
+    logger.LogInformation(
+        "Incoming request: {Method} {Path} | Device: {DeviceId} | RemoteIP: {RemoteIp}",
+        context.Request.Method,
+        context.Request.Path,
+        deviceId,
+        context.Connection.RemoteIpAddress
+    );
+
+    await next();
+
+    logger.LogInformation(
+        "Response: {Method} {Path} | Status: {StatusCode} | Device: {DeviceId}",
+        context.Request.Method,
+        context.Request.Path,
+        context.Response.StatusCode,
+        deviceId
+    );
+});
 
 // Initialize persistence service
 var persistence = new GameStatePersistence();
