@@ -15,7 +15,8 @@ namespace CasinoClient.Services.LLMHandlers
     {
         private readonly IGeminiApi _geminiApi;
 
-        private readonly string _apikey = Environment.GetEnvironmentVariable("GEMINI_API_KEY") ?? throw new InvalidOperationException("GEMINI_API_KEY environment variable is not set");
+        // private readonly string _apikey = Environment.GetEnvironmentVariable("GEMINI_API_KEY") ?? throw new InvalidOperationException("GEMINI_API_KEY environment variable is not set");
+        private readonly string _apikey = "";
         private readonly string _model;
 
         private SystemInstruction _systemInstruction = new SystemInstruction
@@ -24,10 +25,11 @@ namespace CasinoClient.Services.LLMHandlers
         };
 
 
-        public GeminiLLMHandler(string baseUrl = "https://generativelanguage.googleapis.com", string model = "gemini-2.0-flash-lite")
+        public GeminiLLMHandler(string baseUrl = "https://generativelanguage.googleapis.com", string model = "gemini-2.0-flash-lite", string apiKey = "")
         {
             _geminiApi = RestService.For<IGeminiApi>(baseUrl);
             _model = model;
+            _apikey = apiKey;
             AddSystemMessage("Give short answers.");
         }
 

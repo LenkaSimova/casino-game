@@ -20,30 +20,30 @@ public partial class SlotMachineView : UserControl
     public SlotMachineView()
     {
         InitializeComponent();
-        
+
         // Set up focus properties
         Focusable = true;
-        
+
         // Listen for key presses to forward to the view model
         this.KeyDown += OnKeyDown;
-        
+
         // Ensure control is focused when attached to the visual tree
         this.AttachedToVisualTree += (_, __) => this.Focus();
-        
+
         // Refocus when visibility changes
         this.PropertyChanged += (_, e) =>
         {
             if (e.Property == IsVisibleProperty && this.IsVisible)
                 this.Focus();
         };
-        
+
         // Listen for focus changes within the control tree
         this.GotFocus += OnGotFocus;
         this.LostFocus += OnLostFocus;
-        
+
         // Handle pointer events to maintain focus
         this.PointerPressed += OnPointerPressed;
-        
+
         Focus();
     }
 
@@ -52,11 +52,43 @@ public partial class SlotMachineView : UserControl
     /// </summary>
     private void OnKeyDown(object? sender, KeyEventArgs e)
     {
-        if (DataContext is SlotMachineViewModel vm && e.Key.ToString().Length == 1)
+        if (DataContext is SlotMachineViewModel vm)
         {
-            char keyChar = e.Key.ToString().ToLower()[0];
-            vm.OnKeyPressed(keyChar);
+            char? keyChar = GetCharFromKey(e.Key);
+            if (keyChar.HasValue)
+            {
+                vm.OnKeyPressed(keyChar.Value);
+            }
         }
+    }
+
+    /// <summary>
+    /// Converts a Key enum value to its corresponding character.
+    /// </summary>
+    private char? GetCharFromKey(Key key)
+    {
+        // Handle letter keys (A-Z)
+        if (key >= Key.A && key <= Key.Z)
+        {
+            return (char)('a' + (key - Key.A));
+        }
+
+        // Handle number keys (0-9) from main keyboard
+        if (key >= Key.D0 && key <= Key.D9)
+        {
+            return (char)('0' + (key - Key.D0));
+        }
+
+        // Handle number keys from numpad
+        if (key >= Key.NumPad0 && key <= Key.NumPad9)
+        {
+            return (char)('0' + (key - Key.NumPad0));
+        }
+
+        // Handle special characters if needed
+        // You can add more cases here for other special characters
+
+        return null;
     }
 
     /// <summary>

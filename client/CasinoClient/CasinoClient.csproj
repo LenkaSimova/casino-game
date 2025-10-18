@@ -29,6 +29,7 @@
       <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
     </PackageReference>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1" />
+    <PackageReference Include="MopidySharp" Version="1.1.0" />
     <PackageReference Include="OllamaSharp" Version="5.3.6" />
     <PackageReference Include="Refit" Version="8.0.0" />
   </ItemGroup>

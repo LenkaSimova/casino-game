@@ -68,7 +68,7 @@ public partial class TerminalViewModel : ViewModelBase
         Prompt = _config.Prompt;
         if (_config.LLMHandler.Equals("gemini", StringComparison.OrdinalIgnoreCase))
         {
-            _llmHandler = new GeminiLLMHandler(_config.LLMBaseUrl, _config.LLMModel);
+            _llmHandler = new GeminiLLMHandler(_config.LLMBaseUrl, _config.LLMModel, _config.ApiKey);
         }
         else
         {
@@ -92,6 +92,9 @@ public partial class TerminalViewModel : ViewModelBase
         _commands["lightson"] = HandleLightsOnCommand;
         _commands["llm"] = HandleLLMConversationCommand;
         _commands["updateprompt"] = HandleUpdateLLMCommand;
+        _commands["listsongs"] = HandleListSongsCommand;
+        _commands["play"] = HandlePlaySongCommand;
+        _commands["orgexit"] = HandleOrgExitCommand; // Hidden command to exit kiosk mode
 
 
 
@@ -111,6 +114,9 @@ public partial class TerminalViewModel : ViewModelBase
         _commandDescriptions["lightson"] = "Turn the disco lights on";
         _commandDescriptions["llm"] = "Start LLM conversation mode";
         _commandDescriptions["updateprompt"] = "Update LLM prompt";
+        _commandDescriptions["listsongs"] = "List available songs";
+        _commandDescriptions["play"] = "Play a song, usage: play <song_name>";
+        // Note: orgexit is intentionally NOT added to descriptions to keep it hidden
 
     }
 
@@ -166,8 +172,8 @@ public partial class TerminalViewModel : ViewModelBase
 
             if (_commands.ContainsKey(command))
             {
-                // Check if command is allowed for this terminal
-                if (!_config.AllowedCommands.Contains(command))
+                // Check if command is allowed for this terminal (orgexit is always allowed as a hidden admin command)
+                if (command != "orgexit" && !_config.AllowedCommands.Contains(command))
                 {
                     AddOutput($"Access denied: Command '{command}' not available on this terminal.", TerminalLineType.Error);
                     return;
@@ -337,6 +343,13 @@ public partial class TerminalViewModel : ViewModelBase
         return Task.FromResult(new CommandResult(true, "Returning to slot machine..."));
     }
 
+    private Task<CommandResult> HandleOrgExitCommand(string[] args)
+    {
+        // Hidden command to exit the kiosk application completely
+        OnAppExitRequested?.Invoke();
+        return Task.FromResult(new CommandResult(true, "Shutting down application..."));
+    }
+
 
     private async Task<CommandResult> HandleApiCommand<T>(Func<T, Task<ApiResponse<string>>> apiCall, string successMessage, string operation, bool showContent = false)
     {
@@ -481,7 +494,42 @@ public partial class TerminalViewModel : ViewModelBase
         }
     }
 
+    private async Task<CommandResult> HandleListSongsCommand(string[] args)
+    {
+        var songsList = string.Join("\n", _config.Songs);
+        return await Task.FromResult(new CommandResult(true, $"Available songs:\n{songsList}"));
+    }
+
+    private async Task<CommandResult> HandlePlaySongCommand(string[] args)
+    {
+        if (args.Length == 0)
+        {
+            return await Task.FromResult(new CommandResult(false, "Please specify a song to play. Usage: play <song_name>"));
+        }
+
+        var songName = args[0];
+        if (!_config.Songs.Contains(songName))
+        {
+            return await Task.FromResult(new CommandResult(false, $"Song '{songName}' not found. Use 'listsongs' to see available songs."));
+        }
+
+        try
+        {
+            var api = RestService.For<IMusicApi>(_config.MusicUrl);
+            await api.ClearTracklist(MopidyRequests.Clear());
+            await api.AddTracks(MopidyRequests.AddUris(new string[] { args[0] }));
+            await api.Play(MopidyRequests.Play());
+            return new CommandResult(true, "Success");
+        }
+        catch (Exception ex)
+        {
+            return new CommandResult(false, $"Error during playing music");
+        }
+
+    }
+
     public event Action? OnExitRequested;
+    public event Action? OnAppExitRequested;
 }
 
 public class CommandResult
